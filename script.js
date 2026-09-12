@@ -492,3 +492,48 @@ document.addEventListener("DOMContentLoaded", function () {
   loadDashboard();
   initSidebar();
 });
+
+/* =========================================================
+   SET DEFAULT TANGGAL (Awal Bulan s/d Hari Ini)
+========================================================= */
+function setDefaultDates() {
+  const startDateInput = document.getElementById("startDate");
+  const endDateInput = document.getElementById("endDate");
+
+  const today = new Date();
+
+  // Tanggal hari ini (format YYYY-MM-DD)
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  // Tanggal 1 bulan ini (format YYYY-MM-DD)
+  const firstDayStr = `${yyyy}-${mm}-01`;
+
+  // Set nilai ke input tanggal jika elemennya ada
+  if (startDateInput) startDateInput.value = firstDayStr;
+  if (endDateInput) endDateInput.value = todayStr;
+}
+
+/* =========================================================
+   UPDATE INITIALIZE DASHBOARD
+========================================================= */
+function initializeDashboard(data) {
+  const totalKdkmpEl = document.getElementById("totalKdkmp");
+  if (totalKdkmpEl) totalKdkmpEl.textContent = data.totalKdkmp || 34;
+
+  populateKdkmpFilter(data.kdkmpList || []);
+
+  // Render Tabel Menu KDKMP & Setoran
+  renderKdkmpTable(data.kdkmpList || [], data.operationalKdkmp || []);
+  renderSetoranTable(data.rows || []);
+
+  // Set tanggal default (Awal bulan s/d Hari ini) sebelum applyFilter
+  setDefaultDates();
+
+  // Filter & Render Dashboard Utama
+  applyFilter();
+  updateOperational(data);
+  updateLastUpdate();
+}

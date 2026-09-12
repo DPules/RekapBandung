@@ -1,0 +1,323 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_top" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Sales KDKMP Bandung</title>
+
+    <!-- CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div>
+          <h2>KDKMP</h2>
+          <span>Bandung Area</span>
+        </div>
+      </div>
+
+      <nav>
+        <button class="nav-item active" data-target="sec-dashboard">
+          <i class="fa-solid fa-gauge-high"></i>
+          Dashboard
+        </button>
+
+        <button class="nav-item" data-target="sec-kdkmp">
+          <i class="fa-solid fa-store"></i>
+          KDKMP
+        </button>
+
+        <button class="nav-item" data-target="sec-setoran">
+          <i class="fa-solid fa-money-bill-transfer"></i>
+          Setoran
+        </button>
+
+        <button class="nav-item" data-target="sec-rekap">
+          <i class="fa-solid fa-chart-column"></i>
+          Rekap Sales
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <small>Monitoring Sales</small>
+        <strong>Bandung</strong>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">Dashboard Sales</h1>
+          <p id="pageSub">
+            Monitoring operasional dan setoran KDKMP Area Bandung
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 10px">
+          <a
+            href="input.html"
+            target="_blank"
+            class="refresh-btn"
+            style="text-decoration: none; background: #18864b"
+          >
+            <i class="fa-solid fa-plus"></i> Input Setoran
+          </a>
+          <button class="refresh-btn" onclick="loadDashboard()">
+            <i class="fa-solid fa-rotate"></i> Refresh
+          </button>
+        </div>
+      </header>
+
+      <!-- SECTION 1: DASHBOARD (Utama) -->
+      <div id="sec-dashboard" class="page-section active-section">
+        <!-- FILTER -->
+        <section class="filter-card">
+          <div class="filter-title">
+            <i class="fa-solid fa-filter"></i>
+            Filter Data
+          </div>
+
+          <div class="filter-grid">
+            <div class="form-group">
+              <label>Dari Tanggal</label>
+              <input type="date" id="startDate" />
+            </div>
+
+            <div class="form-group">
+              <label>Sampai Tanggal</label>
+              <input type="date" id="endDate" />
+            </div>
+
+            <div class="form-group">
+              <label>KDKMP</label>
+              <select id="kdkmpFilter">
+                <option value="ALL">Semua KDKMP</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Status</label>
+              <select id="statusFilter">
+                <option value="ALL">Semua</option>
+                <option value="Close Shift">Close Shift</option>
+                <option value="Setor Omset">Setor Omset</option>
+              </select>
+            </div>
+
+            <button class="apply-btn" onclick="applyFilter()">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              Tampilkan
+            </button>
+          </div>
+        </section>
+
+        <!-- KPI -->
+        <section class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon">
+              <i class="fa-solid fa-store"></i>
+            </div>
+            <div>
+              <span>Total KDKMP</span>
+              <strong id="totalKdkmp">34</strong>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon operational">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+              <span>Operasional</span>
+              <strong id="operasional">0</strong>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon pending">
+              <i class="fa-solid fa-store-slash"></i>
+            </div>
+            <div>
+              <span>Belum Operasional</span>
+              <strong id="belumOperasional">0</strong>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon omzet">
+              <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+            <div>
+              <span>Total Omset</span>
+              <strong id="totalOmset">Rp 0</strong>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon transfer">
+              <i class="fa-solid fa-money-check-dollar"></i>
+            </div>
+            <div>
+              <span>Total Setoran</span>
+              <strong id="totalSetoran">Rp 0</strong>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon selisih">
+              <i class="fa-solid fa-scale-balanced"></i>
+            </div>
+            <div>
+              <span>Selisih</span>
+              <strong id="totalSelisih">Rp 0</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHART -->
+        <section class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <h3>Trend Omset Harian</h3>
+                <span>Close Shift vs Setor Omset</span>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="dailyChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <h3>Status KDKMP</h3>
+                <span>Operasional Area Bandung</span>
+              </div>
+            </div>
+            <div class="chart-container small">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- SECTION 2: KDKMP -->
+      <div id="sec-kdkmp" class="page-section" style="display: none">
+        <section class="table-card">
+          <div class="table-header">
+            <div>
+              <h3>Daftar KDKMP Area Bandung</h3>
+              <span>Daftar outlet aktif dan status operasional</span>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama KDKMP</th>
+                  <th>Status Operasional</th>
+                </tr>
+              </thead>
+              <tbody id="kdkmpTableBody">
+                <tr>
+                  <td colspan="3" class="loading">Memuat daftar KDKMP...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- SECTION 3: SETORAN -->
+      <div id="sec-setoran" class="page-section" style="display: none">
+        <section class="table-card">
+          <div class="table-header">
+            <div>
+              <h3>Rekap Setoran Omset</h3>
+              <span>Monitoring khusus transaksi setor omset</span>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>KDKMP</th>
+                  <th>Nominal Setoran</th>
+                  <th>Bukti</th>
+                </tr>
+              </thead>
+              <tbody id="setoranTableBody">
+                <tr>
+                  <td colspan="5" class="loading">Memuat data setoran...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- SECTION 4: REKAP SALES -->
+      <div id="sec-rekap" class="page-section" style="display: none">
+        <section class="table-card">
+          <div class="table-header">
+            <div>
+              <h3>Rekap Sales Seluruh Transaksi</h3>
+              <span id="tableInfo">Data transaksi</span>
+            </div>
+            <button class="export-btn" onclick="exportCSV()">
+              <i class="fa-solid fa-download"></i>
+              Export
+            </button>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>KDKMP</th>
+                  <th>Close Shift</th>
+                  <th>Setor Omset</th>
+                  <th>Selisih</th>
+                  <th>Status</th>
+                  <th>Bukti</th>
+                </tr>
+              </thead>
+              <tbody id="salesTable">
+                <tr>
+                  <td colspan="8" class="loading">Memuat data...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- FOOTER -->
+      <footer>
+        Dashboard Sales KDKMP Bandung
+        <span id="lastUpdate"></span>
+      </footer>
+    </main>
+
+    <!-- CHART JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

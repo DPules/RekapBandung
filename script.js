@@ -1,4 +1,4 @@
-// GANTI DENGAN URL DEPLOYMENT WEB APP APPS SCRIPT ANDA (Berakhiran /exec)
+// ⚠️ GANTI DENGAN URL DEPLOYMENT WEB APP APPS SCRIPT ANDA (Berakhiran /exec)
 const API_URL =
   "https://script.google.com/macros/s/AKfycbytQnTdl9gEqBUX3dfXdwZoEoES54ntEYIrYQP4s1I9RHYjcmkse9IzUKRj-zW_kBRd1Q/exec";
 
@@ -13,38 +13,18 @@ let filteredRows = [];
 function loadDashboard() {
   showLoading();
 
-  fetch(API_URL, {
-    method: "GET",
-    redirect: "follow",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("HTTP error! Status: " + response.status);
-      }
-      return response.json();
-    })
+  fetch(API_URL, { method: "GET", redirect: "follow" })
+    .then((res) => res.json())
     .then((data) => {
-      console.log("Data berhasil diterima dari Spreadsheet:", data);
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
+      if (data.error) throw new Error(data.error);
       dashboardData = data;
       initializeDashboard(data);
     })
     .catch((error) => {
       console.error("Gagal mengambil data dari Spreadsheet:", error);
-      const salesTable = document.getElementById("salesTable");
-      if (salesTable) {
-        salesTable.innerHTML = `
-          <tr>
-            <td colspan="8" class="loading" style="color: red;">
-              Gagal mengambil data dari Spreadsheet.<br>
-              <small>${error.message}</small>
-            </td>
-          </tr>
-        `;
+      const tbody = document.getElementById("salesTable");
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="8" class="loading" style="color:red;">Gagal mengambil data dari Spreadsheet.<br><small>${error.message}</small></td></tr>`;
       }
     });
 }
@@ -57,15 +37,33 @@ function initializeDashboard(data) {
   if (totalKdkmpEl) totalKdkmpEl.textContent = data.totalKdkmp || 34;
 
   populateKdkmpFilter(data.kdkmpList || []);
-
-  // Render Tabel Menu KDKMP & Setoran
   renderKdkmpTable(data.kdkmpList || [], data.operationalKdkmp || []);
-  renderSetoranTable(data.rows || []);
 
-  // Filter & Render Dashboard Utama
+  // Set tanggal default (01 bulan berjalan s/d hari ini)
+  setDefaultDates();
+
+  // Terapkan filter awal ke semua tabel dan chart
   applyFilter();
   updateOperational(data);
   updateLastUpdate();
+}
+
+/* =========================
+   SET DEFAULT TANGGAL
+========================= */
+function setDefaultDates() {
+  const startDateInput = document.getElementById("startDate");
+  const endDateInput = document.getElementById("endDate");
+
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+
+  if (startDateInput && !startDateInput.value)
+    startDateInput.value = `${yyyy}-${mm}-01`;
+  if (endDateInput && !endDateInput.value)
+    endDateInput.value = `${yyyy}-${mm}-${dd}`;
 }
 
 /* =========================
@@ -76,17 +74,13 @@ function populateKdkmpFilter(list) {
   if (!select) return;
 
   select.innerHTML = `<option value="ALL">Semua KDKMP</option>`;
-
-  list.forEach(function (name) {
-    const option = document.createElement("option");
-    option.value = name;
-    option.textContent = String(name).replaceAll("_", " ");
-    select.appendChild(option);
+  list.forEach((name) => {
+    select.innerHTML += `<option value="${name}">${name.replaceAll("_", " ")}</option>`;
   });
 }
 
 /* =========================
-   APPLY FILTER
+   APPLY FILTER GLOBAL
 ========================= */
 function applyFilter() {
   if (!dashboardData || !dashboardData.rows) return;
@@ -104,58 +98,59 @@ function applyFilter() {
     ? document.getElementById("statusFilter").value
     : "ALL";
 
-  filteredRows = dashboardData.rows.filter(function (row) {
+  filteredRows = dashboardData.rows.filter((row) => {
     if (start && row.date && row.date < start) return false;
     if (end && row.date && row.date > end) return false;
     if (kdkmp !== "ALL" && row.kdkmp !== kdkmp) return false;
 
     if (status !== "ALL") {
       const stClean = String(row.status || "").toLowerCase();
-      const statusTarget = status.toLowerCase();
-      if (!stClean.includes(statusTarget)) return false;
+      if (!stClean.includes(status.toLowerCase())) return false;
     }
 
     return true;
   });
 
+  // Update ringkasan & grafik
   updateKPI(filteredRows);
-  updateTable(filteredRows);
   updateDailyChart(filteredRows);
+
+  // Update seluruh tabel menu secara serentak
+  updateTable(filteredRows); // Rekap Sales
+  renderCloseShiftTable(filteredRows); // Menu Close Shift
+  renderSetoranTable(filteredRows); // Menu Setoran
 }
 
 /* =========================
-   UPDATE KPI CARDS (FIXED PENJUMLAHAN SETORAN)
+   UPDATE KPI CARDS
 ========================= */
 function updateKPI(rows) {
   let closeShift = 0;
   let setorOmset = 0;
 
-  rows.forEach(function (row) {
+  rows.forEach((row) => {
     const statusClean = String(row.status || "")
       .toLowerCase()
       .trim();
     const val = Number(row.nominal || 0);
 
-    // Cek kata kunci status setor / omset
-    if (statusClean.includes("setor") || statusClean === "setor omset") {
+    if (statusClean.includes("setor") || statusClean.includes("omset")) {
       setorOmset += val;
-    } else if (statusClean.includes("close") || statusClean === "close shift") {
-      closeShift += val;
     } else {
-      // Jika status berisi nama orang atau tidak teridentifikasi, hitung sebagai close shift
       closeShift += val;
     }
   });
 
   const selisih = closeShift - setorOmset;
 
-  const omsetEl = document.getElementById("totalOmset");
-  const setoranEl = document.getElementById("totalSetoran");
-  const selisihEl = document.getElementById("totalSelisih");
-
-  if (omsetEl) omsetEl.textContent = formatRupiah(closeShift);
-  if (setoranEl) setoranEl.textContent = formatRupiah(setorOmset);
-  if (selisihEl) selisihEl.textContent = formatRupiah(selisih);
+  if (document.getElementById("totalOmset"))
+    document.getElementById("totalOmset").textContent =
+      formatRupiah(closeShift);
+  if (document.getElementById("totalSetoran"))
+    document.getElementById("totalSetoran").textContent =
+      formatRupiah(setorOmset);
+  if (document.getElementById("totalSelisih"))
+    document.getElementById("totalSelisih").textContent = formatRupiah(selisih);
 }
 
 /* =========================
@@ -164,19 +159,18 @@ function updateKPI(rows) {
 function updateOperational(data) {
   const operational = (data.operationalKdkmp || []).length;
   const total = data.totalKdkmp || 34;
-  const belum = total - operational;
+  const belum = total - operational < 0 ? 0 : total - operational;
 
-  const opEl = document.getElementById("operasional");
-  const belumEl = document.getElementById("belumOperasional");
+  if (document.getElementById("operasional"))
+    document.getElementById("operasional").textContent = operational;
+  if (document.getElementById("belumOperasional"))
+    document.getElementById("belumOperasional").textContent = belum;
 
-  if (opEl) opEl.textContent = operational;
-  if (belumEl) belumEl.textContent = belum < 0 ? 0 : belum;
-
-  createStatusChart(operational, belum < 0 ? 0 : belum);
+  createStatusChart(operational, belum);
 }
 
 /* =========================
-   TABEL UTAMA (REKAP SALES)
+   TABEL REKAP SALES (UTAMA)
 ========================= */
 function updateTable(rows) {
   const tbody = document.getElementById("salesTable");
@@ -188,42 +182,33 @@ function updateTable(rows) {
   }
 
   tbody.innerHTML = "";
-
-  rows.forEach(function (row, index) {
-    const tr = document.createElement("tr");
-
-    let proof = "-";
-    if (row.bukti && row.bukti.startsWith("http")) {
-      proof = `<a class="proof-btn" href="${row.bukti}" target="_blank">Bukti</a>`;
-    }
-
+  rows.forEach((row, index) => {
+    const proof =
+      row.bukti && row.bukti.startsWith("http")
+        ? `<a class="proof-btn" href="${row.bukti}" target="_blank">Bukti</a>`
+        : "-";
     const isSetor = String(row.status || "")
       .toLowerCase()
       .includes("setor");
     const badgeClass = !isSetor ? "badge-success" : "badge-warning";
 
-    const closeShiftVal = !isSetor ? formatRupiah(row.nominal) : "-";
-    const setorOmsetVal = isSetor ? formatRupiah(row.nominal) : "-";
-    const selisihVal = !isSetor
-      ? formatRupiah(row.nominal)
-      : "-" + formatRupiah(row.nominal);
-
+    const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${index + 1}</td>
       <td>${formatDate(row.date)}</td>
-      <td>${row.kdkmp}</td>
-      <td>${closeShiftVal}</td>
-      <td>${setorOmsetVal}</td>
-      <td>${selisihVal}</td>
+      <td>${row.kdkmp ? row.kdkmp.replaceAll("_", " ") : "-"}</td>
+      <td>${!isSetor ? formatRupiah(row.nominal) : "-"}</td>
+      <td>${isSetor ? formatRupiah(row.nominal) : "-"}</td>
+      <td>${!isSetor ? formatRupiah(row.nominal) : "-" + formatRupiah(row.nominal)}</td>
       <td><span class="badge ${badgeClass}">${row.status || "Close Shift"}</span></td>
       <td>${proof}</td>
     `;
-
     tbody.appendChild(tr);
   });
 
-  const tableInfo = document.getElementById("tableInfo");
-  if (tableInfo) tableInfo.textContent = rows.length + " transaksi";
+  if (document.getElementById("tableInfo"))
+    document.getElementById("tableInfo").textContent =
+      rows.length + " transaksi";
 }
 
 /* =========================
@@ -232,12 +217,6 @@ function updateTable(rows) {
 function renderKdkmpTable(kdkmpList, operationalList) {
   const tbody = document.getElementById("kdkmpTableBody");
   if (!tbody) return;
-
-  if (!kdkmpList.length) {
-    tbody.innerHTML = `<tr><td colspan="3" class="loading">Tidak ada data KDKMP.</td></tr>`;
-    return;
-  }
-
   tbody.innerHTML = "";
 
   kdkmpList.forEach((name, index) => {
@@ -256,37 +235,69 @@ function renderKdkmpTable(kdkmpList, operationalList) {
 }
 
 /* =========================
+   TABEL MENU CLOSE SHIFT
+========================= */
+function renderCloseShiftTable(rows) {
+  const tbody = document.getElementById("closeShiftTableBody");
+  if (!tbody) return;
+
+  const closeRows = rows.filter(
+    (row) =>
+      !String(row.status || "")
+        .toLowerCase()
+        .includes("setor"),
+  );
+  if (!closeRows.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="loading">Belum ada transaksi close shift.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = "";
+  closeRows.forEach((row, index) => {
+    const proof =
+      row.bukti && row.bukti.startsWith("http")
+        ? `<a class="proof-btn" href="${row.bukti}" target="_blank">Bukti</a>`
+        : "-";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${formatDate(row.date)}</td>
+      <td><strong>${row.kdkmp ? row.kdkmp.replaceAll("_", " ") : "-"}</strong></td>
+      <td><strong style="color: #18864b;">${formatRupiah(row.nominal)}</strong></td>
+      <td>${proof}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* =========================
    TABEL MENU SETORAN
 ========================= */
 function renderSetoranTable(rows) {
   const tbody = document.getElementById("setoranTableBody");
   if (!tbody) return;
 
-  const setoranRows = rows.filter((row) => {
-    const stClean = String(row.status || "")
+  const setoranRows = rows.filter((row) =>
+    String(row.status || "")
       .toLowerCase()
-      .trim();
-    return stClean.includes("setor") || stClean.includes("omset");
-  });
-
+      .includes("setor"),
+  );
   if (!setoranRows.length) {
     tbody.innerHTML = `<tr><td colspan="5" class="loading">Belum ada transaksi setor omset.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = "";
-
   setoranRows.forEach((row, index) => {
-    let proof = "-";
-    if (row.bukti && row.bukti.startsWith("http")) {
-      proof = `<a class="proof-btn" href="${row.bukti}" target="_blank">Bukti</a>`;
-    }
-
+    const proof =
+      row.bukti && row.bukti.startsWith("http")
+        ? `<a class="proof-btn" href="${row.bukti}" target="_blank">Bukti</a>`
+        : "-";
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${index + 1}</td>
       <td>${formatDate(row.date)}</td>
-      <td>${row.kdkmp}</td>
+      <td><strong>${row.kdkmp ? row.kdkmp.replaceAll("_", " ") : "-"}</strong></td>
       <td><strong style="color: #087da5;">${formatRupiah(row.nominal)}</strong></td>
       <td>${proof}</td>
     `;
@@ -295,38 +306,25 @@ function renderSetoranTable(rows) {
 }
 
 /* =========================
-   DAILY CHART
+   CHARTS & FORMATTERS
 ========================= */
 function updateDailyChart(rows) {
   const map = {};
-
-  rows.forEach(function (row) {
+  rows.forEach((row) => {
     const d = row.date || "Lainnya";
-    if (!map[d]) {
-      map[d] = { close: 0, setor: 0 };
-    }
+    if (!map[d]) map[d] = { close: 0, setor: 0 };
     const isClose = !String(row.status || "")
       .toLowerCase()
       .includes("setor");
-    if (isClose) {
-      map[d].close += Number(row.nominal || 0);
-    } else {
-      map[d].setor += Number(row.nominal || 0);
-    }
+    if (isClose) map[d].close += Number(row.nominal || 0);
+    else map[d].setor += Number(row.nominal || 0);
   });
 
   const dates = Object.keys(map).sort();
-  const closeData = dates.map((d) => map[d].close);
-  const setorData = dates.map((d) => map[d].setor);
+  if (dailyChart) dailyChart.destroy();
 
-  if (dailyChart) {
-    dailyChart.destroy();
-  }
-
-  const chartCanvas = document.getElementById("dailyChart");
-  if (!chartCanvas) return;
-
-  const ctx = chartCanvas.getContext("2d");
+  const ctx = document.getElementById("dailyChart")?.getContext("2d");
+  if (!ctx) return;
 
   dailyChart = new Chart(ctx, {
     type: "line",
@@ -335,56 +333,33 @@ function updateDailyChart(rows) {
       datasets: [
         {
           label: "Close Shift",
-          data: closeData,
+          data: dates.map((d) => map[d].close),
           tension: 0.3,
           borderColor: "#18864b",
         },
         {
           label: "Setor Omset",
-          data: setorData,
+          data: dates.map((d) => map[d].setor),
           tension: 0.3,
           borderColor: "#087da5",
         },
       ],
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          ticks: {
-            callback: function (value) {
-              return formatShortRupiah(value);
-            },
-          },
-        },
-      },
-    },
+    options: { responsive: true, maintainAspectRatio: false },
   });
 }
 
-/* =========================
-   STATUS CHART
-========================= */
 function createStatusChart(operational, belum) {
-  if (statusChart) {
-    statusChart.destroy();
-  }
-
-  const chartCanvas = document.getElementById("statusChart");
-  if (!chartCanvas) return;
-
-  const ctx = chartCanvas.getContext("2d");
+  if (statusChart) statusChart.destroy();
+  const ctx = document.getElementById("statusChart")?.getContext("2d");
+  if (!ctx) return;
 
   statusChart = new Chart(ctx, {
     type: "doughnut",
     data: {
       labels: ["Operasional", "Belum Operasional"],
       datasets: [
-        {
-          data: [operational, belum],
-          backgroundColor: ["#18864b", "#d17b00"],
-        },
+        { data: [operational, belum], backgroundColor: ["#18864b", "#d17b00"] },
       ],
     },
     options: {
@@ -395,42 +370,22 @@ function createStatusChart(operational, belum) {
   });
 }
 
-/* =========================
-   UTILS & FORMATTERS
-========================= */
 function formatRupiah(value) {
   return "Rp " + Number(value || 0).toLocaleString("id-ID");
 }
-
-function formatShortRupiah(value) {
-  value = Number(value || 0);
-  if (value >= 1000000000)
-    return "Rp " + (value / 1000000000).toFixed(1) + " M";
-  if (value >= 1000000) return "Rp " + (value / 1000000).toFixed(1) + " Jt";
-  if (value >= 1000) return "Rp " + (value / 1000).toFixed(0) + " Rb";
-  return "Rp " + value;
-}
-
 function formatDate(date) {
   if (!date) return "-";
   const parts = String(date).split("-");
-  if (parts.length !== 3) return date;
-  return parts[2] + "/" + parts[1] + "/" + parts[0];
+  return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : date;
 }
-
 function updateLastUpdate() {
-  const now = new Date();
-  const lastUpdate = document.getElementById("lastUpdate");
-  if (lastUpdate) {
-    lastUpdate.textContent = "Update: " + now.toLocaleString("id-ID");
-  }
+  const el = document.getElementById("lastUpdate");
+  if (el) el.textContent = "Update: " + new Date().toLocaleString("id-ID");
 }
-
 function showLoading() {
   const tbody = document.getElementById("salesTable");
-  if (tbody) {
+  if (tbody)
     tbody.innerHTML = `<tr><td colspan="8" class="loading">Memuat data dari Spreadsheet...</td></tr>`;
-  }
 }
 
 /* =========================
@@ -450,6 +405,10 @@ function initSidebar() {
     "sec-kdkmp": {
       title: "Data KDKMP",
       sub: "Daftar outlet dan status operasional KDKMP",
+    },
+    "sec-closeshift": {
+      title: "Data Close Shift",
+      sub: "Monitoring transaksi harian close shift KDKMP",
     },
     "sec-setoran": {
       title: "Data Setoran",
@@ -492,48 +451,3 @@ document.addEventListener("DOMContentLoaded", function () {
   loadDashboard();
   initSidebar();
 });
-
-/* =========================================================
-   SET DEFAULT TANGGAL (Awal Bulan s/d Hari Ini)
-========================================================= */
-function setDefaultDates() {
-  const startDateInput = document.getElementById("startDate");
-  const endDateInput = document.getElementById("endDate");
-
-  const today = new Date();
-
-  // Tanggal hari ini (format YYYY-MM-DD)
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-  const todayStr = `${yyyy}-${mm}-${dd}`;
-
-  // Tanggal 1 bulan ini (format YYYY-MM-DD)
-  const firstDayStr = `${yyyy}-${mm}-01`;
-
-  // Set nilai ke input tanggal jika elemennya ada
-  if (startDateInput) startDateInput.value = firstDayStr;
-  if (endDateInput) endDateInput.value = todayStr;
-}
-
-/* =========================================================
-   UPDATE INITIALIZE DASHBOARD
-========================================================= */
-function initializeDashboard(data) {
-  const totalKdkmpEl = document.getElementById("totalKdkmp");
-  if (totalKdkmpEl) totalKdkmpEl.textContent = data.totalKdkmp || 34;
-
-  populateKdkmpFilter(data.kdkmpList || []);
-
-  // Render Tabel Menu KDKMP & Setoran
-  renderKdkmpTable(data.kdkmpList || [], data.operationalKdkmp || []);
-  renderSetoranTable(data.rows || []);
-
-  // Set tanggal default (Awal bulan s/d Hari ini) sebelum applyFilter
-  setDefaultDates();
-
-  // Filter & Render Dashboard Utama
-  applyFilter();
-  updateOperational(data);
-  updateLastUpdate();
-}

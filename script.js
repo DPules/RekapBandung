@@ -7,6 +7,12 @@ let dailyChart = null;
 let statusChart = null;
 let filteredRows = [];
 
+// KONFIGURASI PAGINASI
+const ROWS_PER_PAGE = 10;
+let currentPageSales = 1;
+let currentPageClose = 1;
+let currentPageSetor = 1;
+
 /* =========================
    LOAD DASHBOARD (FETCH API)
 ========================= */
@@ -39,10 +45,7 @@ function initializeDashboard(data) {
   populateKdkmpFilter(data.kdkmpList || []);
   renderKdkmpTable(data.kdkmpList || [], data.operationalKdkmp || []);
 
-  // Set tanggal default (01 bulan berjalan s/d hari ini)
   setDefaultDates();
-
-  // Terapkan filter awal ke semua tabel dan chart
   applyFilter();
   updateOperational(data);
   updateLastUpdate();
@@ -80,7 +83,7 @@ function populateKdkmpFilter(list) {
 }
 
 /* =========================
-   APPLY FILTER GLOBAL
+   APPLY FILTER & SORTING (TERBARU KULI/ATAS)
 ========================= */
 function applyFilter() {
   if (!dashboardData || !dashboardData.rows) return;
@@ -111,14 +114,24 @@ function applyFilter() {
     return true;
   });
 
+  // SORTING: TANGGAL TERBARU KE TERLAMA (DESCENDING)
+  filteredRows.sort((a, b) => {
+    return new Date(b.date || 0) - new Date(a.date || 0);
+  });
+
+  // Reset Halaman ke 1 saat filter diubah
+  currentPageSales = 1;
+  currentPageClose = 1;
+  currentPageSetor = 1;
+
   // Update ringkasan & grafik
   updateKPI(filteredRows);
   updateDailyChart(filteredRows);
 
-  // Update seluruh tabel menu secara serentak
-  updateTable(filteredRows); // Rekap Sales
-  renderCloseShiftTable(filteredRows); // Menu Close Shift
-  renderSetoranTable(filteredRows); // Menu Setoran
+  // Update seluruh tabel menu
+  updateTable(filteredRows);
+  renderCloseShiftTable(filteredRows);
+  renderSetoranTable(filteredRows);
 }
 
 /* =========================
@@ -170,7 +183,7 @@ function updateOperational(data) {
 }
 
 /* =========================
-   TABEL REKAP SALES (UTAMA)
+   TABEL REKAP SALES (WITH PAGINATION)
 ========================= */
 function updateTable(rows) {
   const tbody = document.getElementById("salesTable");
@@ -178,11 +191,15 @@ function updateTable(rows) {
 
   if (!rows.length) {
     tbody.innerHTML = `<tr><td colspan="8" class="loading">Tidak ada data transaksi.</td></tr>`;
+    renderPaginationControls("salesPagination", 0, 1, () => {});
     return;
   }
 
+  const startIdx = (currentPageSales - 1) * ROWS_PER_PAGE;
+  const pageRows = rows.slice(startIdx, startIdx + ROWS_PER_PAGE);
+
   tbody.innerHTML = "";
-  rows.forEach((row, index) => {
+  pageRows.forEach((row, index) => {
     const proof =
       row.bukti && row.bukti.startsWith("http")
         ? `<a class="proof-btn" href="${row.bukti}" target="_blank">Bukti</a>`
@@ -194,7 +211,7 @@ function updateTable(rows) {
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${index + 1}</td>
+      <td>${startIdx + index + 1}</td>
       <td>${formatDate(row.date)}</td>
       <td>${row.kdkmp ? row.kdkmp.replaceAll("_", " ") : "-"}</td>
       <td>${!isSetor ? formatRupiah(row.nominal) : "-"}</td>
@@ -206,9 +223,20 @@ function updateTable(rows) {
     tbody.appendChild(tr);
   });
 
-  if (document.getElementById("tableInfo"))
+  if (document.getElementById("tableInfo")) {
     document.getElementById("tableInfo").textContent =
-      rows.length + " transaksi";
+      `${rows.length} transaksi (${currentPageSales}/${Math.ceil(rows.length / ROWS_PER_PAGE)} hal)`;
+  }
+
+  renderPaginationControls(
+    "salesPagination",
+    rows.length,
+    currentPageSales,
+    (newPage) => {
+      currentPageSales = newPage;
+      updateTable(rows);
+    },
+  );
 }
 
 /* =========================
@@ -235,7 +263,7 @@ function renderKdkmpTable(kdkmpList, operationalList) {
 }
 
 /* =========================
-   TABEL MENU CLOSE SHIFT
+   TABEL MENU CLOSE SHIFT (WITH PAGINATION)
 ========================= */
 function renderCloseShiftTable(rows) {
   const tbody = document.getElementById("closeShiftTableBody");
@@ -249,18 +277,22 @@ function renderCloseShiftTable(rows) {
   );
   if (!closeRows.length) {
     tbody.innerHTML = `<tr><td colspan="5" class="loading">Belum ada transaksi close shift.</td></tr>`;
+    renderPaginationControls("closeShiftPagination", 0, 1, () => {});
     return;
   }
 
+  const startIdx = (currentPageClose - 1) * ROWS_PER_PAGE;
+  const pageRows = closeRows.slice(startIdx, startIdx + ROWS_PER_PAGE);
+
   tbody.innerHTML = "";
-  closeRows.forEach((row, index) => {
+  pageRows.forEach((row, index) => {
     const proof =
       row.bukti && row.bukti.startsWith("http")
         ? `<a class="proof-btn" href="${row.bukti}" target="_blank">Bukti</a>`
         : "-";
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${index + 1}</td>
+      <td>${startIdx + index + 1}</td>
       <td>${formatDate(row.date)}</td>
       <td><strong>${row.kdkmp ? row.kdkmp.replaceAll("_", " ") : "-"}</strong></td>
       <td><strong style="color: #18864b;">${formatRupiah(row.nominal)}</strong></td>
@@ -268,10 +300,20 @@ function renderCloseShiftTable(rows) {
     `;
     tbody.appendChild(tr);
   });
+
+  renderPaginationControls(
+    "closeShiftPagination",
+    closeRows.length,
+    currentPageClose,
+    (newPage) => {
+      currentPageClose = newPage;
+      renderCloseShiftTable(rows);
+    },
+  );
 }
 
 /* =========================
-   TABEL MENU SETORAN
+   TABEL MENU SETORAN (WITH PAGINATION)
 ========================= */
 function renderSetoranTable(rows) {
   const tbody = document.getElementById("setoranTableBody");
@@ -284,18 +326,22 @@ function renderSetoranTable(rows) {
   );
   if (!setoranRows.length) {
     tbody.innerHTML = `<tr><td colspan="5" class="loading">Belum ada transaksi setor omset.</td></tr>`;
+    renderPaginationControls("setoranPagination", 0, 1, () => {});
     return;
   }
 
+  const startIdx = (currentPageSetor - 1) * ROWS_PER_PAGE;
+  const pageRows = setoranRows.slice(startIdx, startIdx + ROWS_PER_PAGE);
+
   tbody.innerHTML = "";
-  setoranRows.forEach((row, index) => {
+  pageRows.forEach((row, index) => {
     const proof =
       row.bukti && row.bukti.startsWith("http")
         ? `<a class="proof-btn" href="${row.bukti}" target="_blank">Bukti</a>`
         : "-";
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${index + 1}</td>
+      <td>${startIdx + index + 1}</td>
       <td>${formatDate(row.date)}</td>
       <td><strong>${row.kdkmp ? row.kdkmp.replaceAll("_", " ") : "-"}</strong></td>
       <td><strong style="color: #087da5;">${formatRupiah(row.nominal)}</strong></td>
@@ -303,6 +349,70 @@ function renderSetoranTable(rows) {
     `;
     tbody.appendChild(tr);
   });
+
+  renderPaginationControls(
+    "setoranPagination",
+    setoranRows.length,
+    currentPageSetor,
+    (newPage) => {
+      currentPageSetor = newPage;
+      renderSetoranTable(rows);
+    },
+  );
+}
+
+/* =========================
+   HELPER PAGINASI (TOMBOL NEXT / PREV)
+========================= */
+function renderPaginationControls(
+  containerId,
+  totalRows,
+  currentPage,
+  onPageChange,
+) {
+  let container = document.getElementById(containerId);
+
+  if (!container) {
+    // Buat elemen jika belum ada di HTML
+    const activeSection =
+      document.querySelector(".page-section.active-section .table-card") ||
+      document.querySelector(".table-card");
+    if (!activeSection) return;
+    container = document.createElement("div");
+    container.id = containerId;
+    container.className = "pagination-container";
+    activeSection.appendChild(container);
+  }
+
+  const totalPages = Math.ceil(totalRows / ROWS_PER_PAGE);
+  if (totalPages <= 1) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
+      <button class="apply-btn" style="height: 32px; padding: 0 12px; font-size: 12px;" ${currentPage === 1 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ""} id="${containerId}-prev">
+        &laquo; Prev
+      </button>
+      <span style="font-size: 12px; color: #666;">Halaman <strong>${currentPage}</strong> dari <strong>${totalPages}</strong></span>
+      <button class="apply-btn" style="height: 32px; padding: 0 12px; font-size: 12px;" ${currentPage === totalPages ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ""} id="${containerId}-next">
+        Next &raquo;
+      </button>
+    </div>
+  `;
+
+  document
+    .getElementById(`${containerId}-prev`)
+    ?.addEventListener("click", () => {
+      if (currentPage > 1) onPageChange(currentPage - 1);
+    });
+
+  document
+    .getElementById(`${containerId}-next`)
+    ?.addEventListener("click", () => {
+      if (currentPage < totalPages) onPageChange(currentPage + 1);
+    });
 }
 
 /* =========================

@@ -1,309 +1,751 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard KDKMP Sales</title>
-    <link rel="stylesheet" href="style.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  </head>
-  <body>
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-icon"><i class="fa-solid fa-chart-line"></i></div>
-        <div>
-          <h2>KDKMP</h2>
-          <span>Bandung Area</span>
-        </div>
-      </div>
 
-      <nav>
-        <button class="nav-item active" data-target="sec-dashboard">
-          <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
-        </button>
-        <button class="nav-item" data-target="sec-kdkmp">
-          <i class="fa-solid fa-store"></i> <span>KDKMP</span>
-        </button>
-        <button class="nav-item" data-target="sec-closeshift">
-          <i class="fa-solid fa-cash-register"></i> <span>Close Shift</span>
-        </button>
-        <button class="nav-item" data-target="sec-setoran">
-          <i class="fa-solid fa-wallet"></i> <span>Setoran</span>
-        </button>
-        <button class="nav-item" data-target="sec-rekap">
-          <i class="fa-solid fa-table"></i> <span>Rekap Sales</span>
-        </button>
-      </nav>
+<head>
+    <base target="_top">
 
-      <div class="sidebar-footer">
-        Monitoring Sales
-        <strong id="lastUpdate">Update: -</strong>
-      </div>
-    </aside>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- MAIN CONTENT -->
-    <main class="main">
-      <header class="topbar">
-        <div>
-          <h1 id="pageTitle">Dashboard Sales</h1>
-          <p id="pageSub">
-            Monitoring operasional dan setoran KDKMP Area Bandung
-          </p>
-        </div>
+    <title>Stock Opname KDKMP</title>
 
-        <div style="display: flex; gap: 10px">
-          <a
-            href="input.html"
-            class="refresh-btn"
-            style="text-decoration: none; background: #18864b"
-          >
-            <i class="fa-solid fa-plus"></i> Input Setoran
-          </a>
-          <button class="refresh-btn" onclick="loadDashboard()">
-            <i class="fa-solid fa-rotate"></i> Refresh
-          </button>
-        </div>
-      </header>
+    <?!= include('CSS'); ?>
+</head>
 
-      <!-- FILTER GLOBAL (TAMPIL DI SETIAP MENU SIDEBAR) -->
-      <div class="filter-card">
-        <div class="filter-title">
-          <i class="fa-solid fa-filter"></i> Filter Data
-        </div>
-        <div class="filter-grid">
-          <div class="form-group">
-            <label>Dari Tanggal</label>
-            <input type="date" id="startDate" />
-          </div>
-          <div class="form-group">
-            <label>Sampai Tanggal</label>
-            <input type="date" id="endDate" />
-          </div>
-          <div class="form-group">
-            <label>KDKMP</label>
-            <select id="kdkmpFilter">
-              <option value="ALL">Semua KDKMP</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select id="statusFilter">
-              <option value="ALL">Semua Status</option>
-              <option value="Close Shift">Close Shift</option>
-              <option value="Setor Omset">Setor Omset</option>
-            </select>
-          </div>
-          <button class="apply-btn" onclick="applyFilter()">
-            <i class="fa-solid fa-magnifying-glass"></i> Tampilkan
-          </button>
-        </div>
-      </div>
+<body>
 
-      <!-- SECTION 1: DASHBOARD UTAMA -->
-      <section id="sec-dashboard" class="page-section active-section">
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-icon"><i class="fa-solid fa-store"></i></div>
-            <div>
-              <span>Total KDKMP</span><strong id="totalKdkmp">34</strong>
+    <!-- =========================
+       LOGIN
+  ========================== -->
+
+    <div id="loginPage" class="page">
+
+        <div class="login-container">
+
+            <div class="login-card">
+
+                <div class="logo-box">
+                    <div class="logo-icon">K</div>
+                </div>
+
+                <h1>Stock Opname</h1>
+                <p class="subtitle">KDKMP</p>
+
+                <form id="loginForm">
+
+                    <div class="form-group">
+
+                        <label>Username</label>
+
+                        <input type="text" id="username" placeholder="Masukkan username" required
+                            autocomplete="username">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Password</label>
+
+                        <input type="password" id="password" placeholder="Masukkan password" required
+                            autocomplete="current-password">
+
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        LOGIN
+                    </button>
+
+                </form>
+
+                <div id="loginMessage" class="message"></div>
+
             </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon operational">
-              <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <div>
-              <span>Operasional</span><strong id="operasional">0</strong>
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon pending">
-              <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div>
-              <span>Belum Operasional</span
-              ><strong id="belumOperasional">0</strong>
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon omzet">
-              <i class="fa-solid fa-sack-dollar"></i>
-            </div>
-            <div>
-              <span>Total Omset</span><strong id="totalOmset">Rp 0</strong>
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon transfer">
-              <i class="fa-solid fa-money-bill-transfer"></i>
-            </div>
-            <div>
-              <span>Total Setoran</span><strong id="totalSetoran">Rp 0</strong>
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon selisih">
-              <i class="fa-solid fa-scale-unbalanced"></i>
-            </div>
-            <div>
-              <span>Selisih</span><strong id="totalSelisih">Rp 0</strong>
-            </div>
-          </div>
+
         </div>
 
-        <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3>Trend Omset Harian</h3>
-              <span>Close Shift vs Setor Omset</span>
-            </div>
-            <div class="chart-container">
-              <canvas id="dailyChart"></canvas>
-            </div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3>Status KDKMP</h3>
-              <span>Operasional Area Bandung</span>
-            </div>
-            <div class="chart-container small">
-              <canvas id="statusChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </section>
+    </div>
 
-      <!-- SECTION 2: MENU KDKMP -->
-      <section id="sec-kdkmp" class="page-section">
-        <div class="table-card">
-          <div class="table-header">
-            <div>
-              <h3>Status Operasional KDKMP</h3>
-              <span>Daftar outlet aktif dan belum aktif</span>
-            </div>
-          </div>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Nama KDKMP</th>
-                  <th>Status Operasional</th>
-                </tr>
-              </thead>
-              <tbody id="kdkmpTableBody">
-                <tr>
-                  <td colspan="3" class="loading">Memuat data KDKMP...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
 
-      <!-- SECTION 3: MENU CLOSE SHIFT -->
-      <section id="sec-closeshift" class="page-section">
-        <div class="table-card">
-          <div class="table-header">
-            <div>
-              <h3>Data Close Shift</h3>
-              <span>Rincian transaksi close shift operasional KDKMP</span>
-            </div>
-          </div>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Tanggal</th>
-                  <th>Nama KDKMP</th>
-                  <th>Nominal Close Shift</th>
-                  <th>Bukti</th>
-                </tr>
-              </thead>
-              <tbody id="closeShiftTableBody">
-                <tr>
-                  <td colspan="5" class="loading">
-                    Memuat data close shift...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+    <!-- =========================
+       MAIN APPLICATION
+  ========================== -->
 
-      <!-- SECTION 4: MENU SETORAN -->
-      <section id="sec-setoran" class="page-section">
-        <div class="table-card">
-          <div class="table-header">
-            <div>
-              <h3>Data Setor Omset</h3>
-              <span>Rincian transaksi penyetoran dana omset KDKMP</span>
-            </div>
-          </div>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Tanggal</th>
-                  <th>Nama KDKMP</th>
-                  <th>Nominal Setoran</th>
-                  <th>Bukti</th>
-                </tr>
-              </thead>
-              <tbody id="setoranTableBody">
-                <tr>
-                  <td colspan="5" class="loading">Memuat data setoran...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+    <div id="appPage" class="page hidden">
 
-      <!-- SECTION 5: REKAP SALES -->
-      <section id="sec-rekap" class="page-section">
-        <div class="table-card">
-          <div class="table-header">
-            <div>
-              <h3>Rekap Transaksi Sales</h3>
-              <span id="tableInfo">Memuat...</span>
-            </div>
-          </div>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Tanggal</th>
-                  <th>KDKMP</th>
-                  <th>Close Shift</th>
-                  <th>Setor Omset</th>
-                  <th>Selisih</th>
-                  <th>Status</th>
-                  <th>Bukti</th>
-                </tr>
-              </thead>
-              <tbody id="salesTable">
-                <tr>
-                  <td colspan="8" class="loading">
-                    Memuat data dari Spreadsheet...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </main>
+        <!-- SIDEBAR -->
 
-    <script src="script.js"></script>
-  </body>
+        <aside id="sidebar" class="sidebar">
+
+            <div class="sidebar-header">
+
+                <div class="brand">
+                    <div class="brand-icon">K</div>
+
+                    <div>
+                        <strong>KDKMP</strong>
+                        <span>Stock Opname</span>
+                    </div>
+                </div>
+
+                <button class="sidebar-close" onclick="toggleSidebar()">
+                    ×
+                </button>
+
+            </div>
+
+
+            <nav class="menu">
+
+                <button class="menu-item active" onclick="showPage('dashboardPage', this)">
+                    <span>📊</span>
+                    Dashboard
+                </button>
+
+                <button class="menu-item" onclick="showPage('opnamePage', this)">
+                    <span>📦</span>
+                    Stock Opname
+                </button>
+
+                <button class="menu-item" onclick="showPage('historyPage', this)">
+                    <span>📋</span>
+                    Riwayat
+                </button>
+
+                <button class="menu-item admin-menu" onclick="showPage('masterPage', this)">
+                    <span>🗂️</span>
+                    Master Barang
+                </button>
+
+            </nav>
+
+
+            <div class="sidebar-footer">
+
+                <div class="user-info">
+
+                    <div class="avatar" id="userAvatar">
+                        P
+                    </div>
+
+                    <div class="user-detail">
+
+                        <strong id="sidebarUserName">
+                            PIC
+                        </strong>
+
+                        <span id="sidebarUserRole">
+                            PIC
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <button class="logout-btn" onclick="logout()">
+                    Keluar
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- OVERLAY MOBILE -->
+
+        <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+
+        <!-- CONTENT -->
+
+        <main class="main-content">
+
+            <!-- TOPBAR -->
+
+            <header class="topbar">
+
+                <button class="hamburger" onclick="toggleSidebar()">
+                    ☰
+                </button>
+
+                <div class="topbar-title">
+
+                    <h2 id="pageTitle">
+                        Dashboard
+                    </h2>
+
+                    <span id="currentKdkmp">
+                        -
+                    </span>
+
+                </div>
+
+                <div class="topbar-user">
+
+                    <span id="topbarUser">
+                        PIC
+                    </span>
+
+                </div>
+
+            </header>
+
+
+            <!-- =========================
+           DASHBOARD
+      ========================== -->
+
+            <section id="dashboardPage" class="content-page">
+
+                <div class="welcome-card">
+
+                    <div>
+
+                        <span class="small-label">
+                            STOCK OPNAME KDKMP
+                        </span>
+
+                        <h1>
+                            Selamat datang,
+                            <span id="welcomeName">
+                                PIC
+                            </span>
+                        </h1>
+
+                        <p>
+                            Pantau dan lakukan stock opname dengan lebih cepat,
+                            mudah, dan terkontrol.
+                        </p>
+
+                    </div>
+
+                    <button class="btn btn-light" onclick="startNewOpname()">
+                        + Mulai Opname
+                    </button>
+
+                </div>
+
+
+                <!-- STATISTICS -->
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon blue">
+                            📦
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Total Barang
+                            </span>
+
+                            <strong id="statBarang">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon green">
+                            ✓
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Opname Selesai
+                            </span>
+
+                            <strong id="statSelesai">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon orange">
+                            ⏳
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Menunggu Verifikasi
+                            </span>
+
+                            <strong id="statVerifikasi">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon red">
+                            !
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Selisih
+                            </span>
+
+                            <strong id="statSelisih">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- KDKMP INFORMATION -->
+
+                <div class="section-card">
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <h3>
+                                Informasi KDKMP
+                            </h3>
+
+                            <p>
+                                Data lokasi dan PIC
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-grid">
+
+                        <div class="info-item">
+
+                            <span>ID KDKMP</span>
+
+                            <strong id="infoIdKdkmp">
+                                -
+                            </strong>
+
+                        </div>
+
+                        <div class="info-item">
+
+                            <span>Nama KDKMP</span>
+
+                            <strong id="infoNamaKdkmp">
+                                -
+                            </strong>
+
+                        </div>
+
+                        <div class="info-item">
+
+                            <span>Desa/Kelurahan</span>
+
+                            <strong id="infoDesa">
+                                -
+                            </strong>
+
+                        </div>
+
+                        <div class="info-item">
+
+                            <span>Kecamatan</span>
+
+                            <strong id="infoKecamatan">
+                                -
+                            </strong>
+
+                        </div>
+
+                        <div class="info-item">
+
+                            <span>Kabupaten/Kota</span>
+
+                            <strong id="infoKabupaten">
+                                -
+                            </strong>
+
+                        </div>
+
+                        <div class="info-item">
+
+                            <span>PIC</span>
+
+                            <strong id="infoPic">
+                                -
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- LAST OPNAME -->
+
+                <div class="section-card">
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <h3>
+                                Opname Terakhir
+                            </h3>
+
+                            <p>
+                                Aktivitas stock opname terbaru
+                            </p>
+
+                        </div>
+
+                        <button class="btn btn-secondary" onclick="showPage('historyPage')">
+                            Lihat Semua
+                        </button>
+
+                    </div>
+
+                    <div id="lastOpnameContainer">
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                📋
+                            </div>
+
+                            <p>
+                                Belum ada data opname.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+           STOCK OPNAME
+      ========================== -->
+
+            <section id="opnamePage" class="content-page hidden">
+
+                <!-- OPNAME HEADER -->
+
+                <div class="opname-header-card">
+
+                    <div>
+
+                        <span class="small-label">
+                            STOCK OPNAME
+                        </span>
+
+                        <h1>
+                            Penghitungan Stok Fisik
+                        </h1>
+
+                        <p>
+                            Masukkan jumlah fisik barang yang ditemukan.
+                        </p>
+
+                    </div>
+
+                    <div class="opname-actions">
+
+                        <button class="btn btn-secondary" onclick="saveDraft()">
+                            Simpan Draft
+                        </button>
+
+                        <button class="btn btn-primary" onclick="submitOpname()">
+                            Submit Opname
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PROGRESS -->
+
+                <div class="progress-card">
+
+                    <div class="progress-top">
+
+                        <div>
+
+                            <strong>
+                                Progress Opname
+                            </strong>
+
+                            <span id="progressText">
+                                0 / 0 barang
+                            </span>
+
+                        </div>
+
+                        <strong id="progressPercent">
+                            0%
+                        </strong>
+
+                    </div>
+
+                    <div class="progress-bar">
+
+                        <div id="progressBar" class="progress-fill" style="width:0%"></div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SEARCH -->
+
+                <div class="search-card">
+
+                    <div class="search-wrapper">
+
+                        <span class="search-icon">
+                            🔎
+                        </span>
+
+                        <input type="text" id="barangSearch" placeholder="Cari nama atau kode barang..."
+                            oninput="filterBarang()">
+
+                    </div>
+
+                    <select id="kategoriFilter" onchange="filterBarang()">
+
+                        <option value="">
+                            Semua Kategori
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ITEM LIST -->
+
+                <div id="barangContainer">
+
+                    <div class="loading">
+                        Memuat data barang...
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+           HISTORY
+      ========================== -->
+
+            <section id="historyPage" class="content-page hidden">
+
+                <div class="section-card">
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <h3>
+                                Riwayat Stock Opname
+                            </h3>
+
+                            <p>
+                                Riwayat seluruh kegiatan opname
+                            </p>
+
+                        </div>
+
+                        <button class="btn btn-secondary" onclick="loadHistory()">
+                            ↻ Refresh
+                        </button>
+
+                    </div>
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>ID Opname</th>
+                                    <th>Tanggal</th>
+                                    <th>KDKMP</th>
+                                    <th>Petugas</th>
+                                    <th>Item</th>
+                                    <th>Selisih</th>
+                                    <th>Status</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="historyTable">
+
+                                <tr>
+
+                                    <td colspan="7">
+                                        Memuat data...
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+           MASTER BARANG
+      ========================== -->
+
+            <section id="masterPage" class="content-page hidden">
+
+                <div class="section-card">
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <h3>
+                                Master Barang
+                            </h3>
+
+                            <p>
+                                Daftar barang KDKMP
+                            </p>
+
+                        </div>
+
+                        <button class="btn btn-primary" onclick="loadBarang()">
+                            ↻ Refresh
+                        </button>
+
+                    </div>
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Kode</th>
+                                    <th>Nama Barang</th>
+                                    <th>Kategori</th>
+                                    <th>Isi/CTN</th>
+                                    <th>Satuan</th>
+                                    <th>Status</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="masterTable">
+
+                                <tr>
+
+                                    <td colspan="6">
+                                        Memuat data...
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- TOAST -->
+
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+
+    <!-- MODAL CONFIRM -->
+
+    <div id="confirmModal" class="modal hidden">
+
+        <div class="modal-box">
+
+            <div class="modal-icon">
+                ?
+            </div>
+
+            <h3 id="modalTitle">
+                Konfirmasi
+            </h3>
+
+            <p id="modalMessage">
+                Apakah Anda yakin?
+            </p>
+
+            <div class="modal-actions">
+
+                <button class="btn btn-secondary" onclick="closeModal()">
+                    Batal
+                </button>
+
+                <button class="btn btn-primary" id="modalConfirmButton">
+                    Ya, Lanjutkan
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <?!= include('JS'); ?>
+
+</body>
+
 </html>

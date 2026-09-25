@@ -72,7 +72,7 @@ function setDefaultDates() {
 function populateKdkmpFilter(list) {
   const select = document.getElementById("kdkmpFilter");
   if (!select) return;
-  
+
   select.innerHTML = `<option value="ALL">Semua KDKMP</option>`;
   list.forEach(name => {
     select.innerHTML += `<option value="${name}">${name.replaceAll("_", " ")}</option>`;
@@ -167,7 +167,7 @@ function updateTable(rows) {
 
   if (!rows.length) {
     tbody.innerHTML = `<tr><td colspan="8" class="loading">Tidak ada data transaksi.</td></tr>`;
-    renderPaginationControls("salesPagination", 0, 1, () => {});
+    renderPaginationControls("salesPagination", 0, 1, () => { });
     return;
   }
 
@@ -237,7 +237,7 @@ function renderCloseShiftTable(rows) {
   const closeRows = rows.filter(row => !String(row.status || '').toLowerCase().includes("setor"));
   if (!closeRows.length) {
     tbody.innerHTML = `<tr><td colspan="5" class="loading">Belum ada transaksi close shift.</td></tr>`;
-    renderPaginationControls("closeShiftPagination", 0, 1, () => {});
+    renderPaginationControls("closeShiftPagination", 0, 1, () => { });
     return;
   }
 
@@ -274,7 +274,7 @@ function renderSetoranTable(rows) {
   const setoranRows = rows.filter(row => String(row.status || '').toLowerCase().includes("setor"));
   if (!setoranRows.length) {
     tbody.innerHTML = `<tr><td colspan="5" class="loading">Belum ada transaksi setor omset.</td></tr>`;
-    renderPaginationControls("setoranPagination", 0, 1, () => {});
+    renderPaginationControls("setoranPagination", 0, 1, () => { });
     return;
   }
 
@@ -441,7 +441,7 @@ function initSidebar() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   loadDashboard();
   initSidebar();
 });

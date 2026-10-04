@@ -11,6 +11,7 @@ const ROWS_PER_PAGE = 10;
 let currentPageSales = 1;
 let currentPageClose = 1;
 let currentPageSetor = 1;
+let currentPageRanking = 1;
 
 /* =========================
    LOAD DASHBOARD (FETCH API)
@@ -44,14 +45,16 @@ function initializeDashboard(data) {
   populateKdkmpFilter(data.kdkmpList || []);
   renderKdkmpTable(data.kdkmpList || [], data.operationalKdkmp || []);
 
+  // Set default tanggal ke Bulan Berjalan saja
   setDefaultDates();
+
   applyFilter();
   updateOperational(data);
   updateLastUpdate();
 }
 
 /* =========================
-   SET DEFAULT TANGGAL
+   SET DEFAULT TANGGAL (BULAN BERJALAN)
 ========================= */
 function setDefaultDates() {
   const startDateInput = document.getElementById("startDate");
@@ -60,10 +63,13 @@ function setDefaultDates() {
   const today = new Date();
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const dd = String(today.getDate()).padStart(2, '0');
 
-  if (startDateInput && !startDateInput.value) startDateInput.value = `${yyyy}-${mm}-01`;
-  if (endDateInput && !endDateInput.value) endDateInput.value = `${yyyy}-${mm}-${dd}`;
+  const firstDayStr = `${yyyy}-${mm}-01`;
+  const lastDay = new Date(yyyy, today.getMonth() + 1, 0).getDate();
+  const lastDayStr = `${yyyy}-${mm}-${String(lastDay).padStart(2, '0')}`;
+
+  if (startDateInput && !startDateInput.value) startDateInput.value = firstDayStr;
+  if (endDateInput && !endDateInput.value) endDateInput.value = lastDayStr;
 }
 
 /* =========================
@@ -72,7 +78,7 @@ function setDefaultDates() {
 function populateKdkmpFilter(list) {
   const select = document.getElementById("kdkmpFilter");
   if (!select) return;
-
+  
   select.innerHTML = `<option value="ALL">Semua KDKMP</option>`;
   list.forEach(name => {
     select.innerHTML += `<option value="${name}">${name.replaceAll("_", " ")}</option>`;
@@ -103,13 +109,14 @@ function applyFilter() {
     return true;
   });
 
-  // Urutkan dari Tanggal Terbaru ke Terlama (Descending)
+  // Sorting Terbaru ke Terlama
   filteredRows.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
-  // Reset Halaman ke 1 saat filter diubah
+  // Reset Halaman Paginasi ke 1
   currentPageSales = 1;
   currentPageClose = 1;
   currentPageSetor = 1;
+  currentPageRanking = 1;
 
   updateKPI(filteredRows);
   updateDailyChart(filteredRows);
@@ -117,6 +124,7 @@ function applyFilter() {
   updateTable(filteredRows);
   renderCloseShiftTable(filteredRows);
   renderSetoranTable(filteredRows);
+  renderRankingTable(filteredRows);
 }
 
 /* =========================
@@ -167,7 +175,7 @@ function updateTable(rows) {
 
   if (!rows.length) {
     tbody.innerHTML = `<tr><td colspan="8" class="loading">Tidak ada data transaksi.</td></tr>`;
-    renderPaginationControls("salesPagination", 0, 1, () => { });
+    renderPaginationControls("salesPagination", 0, 1, () => {});
     return;
   }
 
@@ -228,6 +236,72 @@ function renderKdkmpTable(kdkmpList, operationalList) {
 }
 
 /* =========================
+   TABEL PERINGKAT OMSET (TERTINGGI KE TERENDAH)
+========================= */
+function renderRankingTable(rows) {
+  const tbody = document.getElementById("rankingTableBody");
+  if (!tbody) return;
+
+  const mapKdkmp = {};
+  (dashboardData.kdkmpList || []).forEach(kdkmp => {
+    mapKdkmp[kdkmp] = { close: 0, setor: 0 };
+  });
+
+  rows.forEach(row => {
+    if (!row.kdkmp) return;
+    if (!mapKdkmp[row.kdkmp]) mapKdkmp[row.kdkmp] = { close: 0, setor: 0 };
+
+    const isSetor = String(row.status || '').toLowerCase().includes("setor");
+    if (isSetor) {
+      mapKdkmp[row.kdkmp].setor += Number(row.nominal || 0);
+    } else {
+      mapKdkmp[row.kdkmp].close += Number(row.nominal || 0);
+    }
+  });
+
+  const rankingList = Object.keys(mapKdkmp).map(kdkmp => ({
+    kdkmp: kdkmp,
+    close: mapKdkmp[kdkmp].close,
+    setor: mapKdkmp[kdkmp].setor,
+    selisih: mapKdkmp[kdkmp].close - mapKdkmp[kdkmp].setor
+  })).sort((a, b) => b.close - a.close);
+
+  if (!rankingList.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="loading">Tidak ada data peringkat.</td></tr>`;
+    renderPaginationControls("rankingPagination", 0, 1, () => {});
+    return;
+  }
+
+  const startIdx = (currentPageRanking - 1) * ROWS_PER_PAGE;
+  const pageRows = rankingList.slice(startIdx, startIdx + ROWS_PER_PAGE);
+
+  tbody.innerHTML = "";
+  pageRows.forEach((item, index) => {
+    const rank = startIdx + index + 1;
+    let rankBadge = `<strong>#${rank}</strong>`;
+    
+    if (rank === 1) rankBadge = `<span style="color: #d4af37; font-size: 16px;"><i class="fa-solid fa-trophy"></i> #1</span>`;
+    else if (rank === 2) rankBadge = `<span style="color: #a8a8a8; font-size: 15px;"><i class="fa-solid fa-trophy"></i> #2</span>`;
+    else if (rank === 3) rankBadge = `<span style="color: #b08d57; font-size: 14px;"><i class="fa-solid fa-trophy"></i> #3</span>`;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${rankBadge}</td>
+      <td><strong>${item.kdkmp.replaceAll("_", " ")}</strong></td>
+      <td><strong style="color: #18864b;">${formatRupiah(item.close)}</strong></td>
+      <td><strong style="color: #087da5;">${formatRupiah(item.setor)}</strong></td>
+      <td><strong>${formatRupiah(item.selisih)}</strong></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  renderPaginationControls("rankingPagination", rankingList.length, currentPageRanking, (newPage) => {
+    currentPageRanking = newPage;
+    renderRankingTable(rows);
+  });
+}
+
+/* =========================
    TABEL MENU CLOSE SHIFT (WITH PAGINATION)
 ========================= */
 function renderCloseShiftTable(rows) {
@@ -237,7 +311,7 @@ function renderCloseShiftTable(rows) {
   const closeRows = rows.filter(row => !String(row.status || '').toLowerCase().includes("setor"));
   if (!closeRows.length) {
     tbody.innerHTML = `<tr><td colspan="5" class="loading">Belum ada transaksi close shift.</td></tr>`;
-    renderPaginationControls("closeShiftPagination", 0, 1, () => { });
+    renderPaginationControls("closeShiftPagination", 0, 1, () => {});
     return;
   }
 
@@ -274,7 +348,7 @@ function renderSetoranTable(rows) {
   const setoranRows = rows.filter(row => String(row.status || '').toLowerCase().includes("setor"));
   if (!setoranRows.length) {
     tbody.innerHTML = `<tr><td colspan="5" class="loading">Belum ada transaksi setor omset.</td></tr>`;
-    renderPaginationControls("setoranPagination", 0, 1, () => { });
+    renderPaginationControls("setoranPagination", 0, 1, () => {});
     return;
   }
 
@@ -409,6 +483,7 @@ function initSidebar() {
   const titles = {
     "sec-dashboard": { title: "Dashboard Sales", sub: "Monitoring operasional dan setoran KDKMP Area Bandung" },
     "sec-kdkmp": { title: "Data KDKMP", sub: "Daftar outlet dan status operasional KDKMP" },
+    "sec-ranking": { title: "Peringkat Omset", sub: "Perbandingan omset KDKMP dari tertinggi ke terendah" },
     "sec-closeshift": { title: "Data Close Shift", sub: "Monitoring transaksi harian close shift KDKMP" },
     "sec-setoran": { title: "Data Setoran", sub: "Monitoring khusus transaksi setor omset KDKMP" },
     "sec-rekap": { title: "Rekap Sales", sub: "Rincian seluruh transaksi sales dan perbandingan omset" }
@@ -441,7 +516,21 @@ function initSidebar() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
   loadDashboard();
   initSidebar();
+});
+/* =========================================================
+   INITALIZATION & AUTO-REFRESH (SETIAP 1 MENIT)
+========================================================= */
+document.addEventListener("DOMContentLoaded", function() {
+  // 1. Muat dashboard saat pertama kali halaman dibuka
+  loadDashboard();
+  initSidebar();
+
+  // 2. Auto-refresh otomatis setiap 60.000 ms (1 menit)
+  setInterval(function() {
+    console.log("Auto-refreshing dashboard data...");
+    loadDashboard();
+  }, 60000); // 60000 milidetik = 1 menit
 });

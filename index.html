@@ -29,6 +29,9 @@
             <button class="nav-item" data-target="sec-kdkmp">
                 <i class="fa-solid fa-store"></i> <span>KDKMP</span>
             </button>
+            <button class="nav-item" data-target="sec-ranking">
+                <i class="fa-solid fa-trophy"></i> <span>Peringkat Omset</span>
+            </button>
             <button class="nav-item" data-target="sec-closeshift">
                 <i class="fa-solid fa-cash-register"></i> <span>Close Shift</span>
             </button>
@@ -64,7 +67,7 @@
             </div>
         </header>
 
-        <!-- FILTER GLOBAL -->
+        <!-- FILTER GLOBAL (TAMPIL DI SEMUA MENU SIDEBAR) -->
         <div class="filter-card">
             <div class="filter-title"><i class="fa-solid fa-filter"></i> Filter Data</div>
             <div class="filter-grid">
@@ -174,7 +177,38 @@
             </div>
         </section>
 
-        <!-- SECTION 3: MENU CLOSE SHIFT -->
+        <!-- SECTION 3: MENU PERINGKAT OMSET -->
+        <section id="sec-ranking" class="page-section">
+            <div class="table-card">
+                <div class="table-header">
+                    <div>
+                        <h3>Peringkat Omset KDKMP</h3>
+                        <span>Urutan KDKMP berdasarkan omset (Close Shift) tertinggi ke terendah</span>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Peringkat</th>
+                                <th>Nama KDKMP</th>
+                                <th>Total Close Shift</th>
+                                <th>Total Setor Omset</th>
+                                <th>Selisih</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankingTableBody">
+                            <tr>
+                                <td colspan="5" class="loading">Memuat peringkat KDKMP...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="rankingPagination"></div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: MENU CLOSE SHIFT -->
         <section id="sec-closeshift" class="page-section">
             <div class="table-card">
                 <div class="table-header">
@@ -201,12 +235,11 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- KONTAINER PAGINASI CLOSE SHIFT -->
                 <div id="closeShiftPagination"></div>
             </div>
         </section>
 
-        <!-- SECTION 4: MENU SETORAN -->
+        <!-- SECTION 5: MENU SETORAN -->
         <section id="sec-setoran" class="page-section">
             <div class="table-card">
                 <div class="table-header">
@@ -233,12 +266,11 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- KONTAINER PAGINASI SETORAN -->
                 <div id="setoranPagination"></div>
             </div>
         </section>
 
-        <!-- SECTION 5: REKAP SALES -->
+        <!-- SECTION 6: REKAP SALES -->
         <section id="sec-rekap" class="page-section">
             <div class="table-card">
                 <div class="table-header">
@@ -268,7 +300,6 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- KONTAINER PAGINASI REKAP SALES -->
                 <div id="salesPagination"></div>
             </div>
         </section>

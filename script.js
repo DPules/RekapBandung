@@ -13,9 +13,9 @@ let currentPageClose = 1;
 let currentPageSetor = 1;
 let currentPageRanking = 1;
 
-/* =========================
+/* =========================================================
    LOAD DASHBOARD (FETCH API)
-========================= */
+========================================================= */
 function loadDashboard() {
   showLoading();
 
@@ -35,9 +35,9 @@ function loadDashboard() {
     });
 }
 
-/* =========================
+/* =========================================================
    INITIALIZE DASHBOARD
-========================= */
+========================================================= */
 function initializeDashboard(data) {
   const totalKdkmpEl = document.getElementById("totalKdkmp");
   if (totalKdkmpEl) totalKdkmpEl.textContent = data.totalKdkmp || 34;
@@ -45,7 +45,7 @@ function initializeDashboard(data) {
   populateKdkmpFilter(data.kdkmpList || []);
   renderKdkmpTable(data.kdkmpList || [], data.operationalKdkmp || []);
 
-  // Set default tanggal ke Bulan Berjalan saja
+  // Set default tanggal ke Bulan Berjalan
   setDefaultDates();
 
   applyFilter();
@@ -53,9 +53,9 @@ function initializeDashboard(data) {
   updateLastUpdate();
 }
 
-/* =========================
+/* =========================================================
    SET DEFAULT TANGGAL (BULAN BERJALAN)
-========================= */
+========================================================= */
 function setDefaultDates() {
   const startDateInput = document.getElementById("startDate");
   const endDateInput = document.getElementById("endDate");
@@ -72,9 +72,9 @@ function setDefaultDates() {
   if (endDateInput && !endDateInput.value) endDateInput.value = lastDayStr;
 }
 
-/* =========================
+/* =========================================================
    FILTER DROPDOWN KDKMP
-========================= */
+========================================================= */
 function populateKdkmpFilter(list) {
   const select = document.getElementById("kdkmpFilter");
   if (!select) return;
@@ -85,9 +85,9 @@ function populateKdkmpFilter(list) {
   });
 }
 
-/* =========================
+/* =========================================================
    APPLY FILTER & SORTING (TERBARU DI ATAS)
-========================= */
+========================================================= */
 function applyFilter() {
   if (!dashboardData || !dashboardData.rows) return;
 
@@ -109,7 +109,7 @@ function applyFilter() {
     return true;
   });
 
-  // Sorting Terbaru ke Terlama
+  // Sorting Tanggal Terbaru ke Terlama
   filteredRows.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
   // Reset Halaman Paginasi ke 1
@@ -125,11 +125,141 @@ function applyFilter() {
   renderCloseShiftTable(filteredRows);
   renderSetoranTable(filteredRows);
   renderRankingTable(filteredRows);
+
+  // Evaluasi Alert System (Double Input, H-1 Close, H-3 Setor)
+  checkSystemAlerts(filteredRows, start, end);
 }
 
-/* =========================
+/* =========================================================
+   DETEKSI DOUBLE INPUT & KDKMP BELUM MENGISI (HARI INI > 17:00 & H-3)
+========================================================= */
+function checkSystemAlerts(rows, startDate, endDate) {
+  const alertContainer = document.getElementById("alertContainer");
+  if (!alertContainer) return;
+
+  alertContainer.innerHTML = "";
+
+  // 1. DETEKSI DOUBLE INPUT (Satu Tanggal, KDKMP Sama, Jenis Sama > 1)
+  const inputTracker = {};
+  const duplicates = [];
+
+  rows.forEach(row => {
+    if (!row.date || !row.kdkmp) return;
+    const isSetor = String(row.status || '').toLowerCase().includes("setor");
+    const typeKey = isSetor ? "Setor Omset" : "Close Shift";
+    const key = `${row.date}_${row.kdkmp}_${typeKey}`;
+
+    if (!inputTracker[key]) {
+      inputTracker[key] = 1;
+    } else {
+      inputTracker[key]++;
+      if (inputTracker[key] === 2) {
+        duplicates.push({
+          date: row.date,
+          kdkmp: row.kdkmp,
+          type: typeKey
+        });
+      }
+    }
+  });
+
+  if (duplicates.length > 0) {
+    let dupHtml = `<div style="background: #fcebea; border: 1px solid #f5c6cb; color: #721c24; padding: 14px; border-radius: 10px; font-size: 13px;">`;
+    dupHtml += `<strong><i class="fa-solid fa-triangle-exclamation"></i> Terdeteksi Pengisian Ganda (Double Input):</strong><ul style="margin: 8px 0 0 18px; padding: 0;">`;
+    
+    duplicates.forEach(dup => {
+      dupHtml += `<li><strong>${dup.kdkmp.replaceAll("_", " ")}</strong> mengisi <u>${dup.type}</u> lebih dari 1 kali pada tanggal <strong>${formatDate(dup.date)}</strong></li>`;
+    });
+    
+    dupHtml += `</ul></div>`;
+    alertContainer.innerHTML += dupHtml;
+  }
+
+  // 2. LOGIKA PENGECEKAN TANGGAL HARI INI & JAM > 17:00
+  const now = new Date();
+  const currentHour = now.getHours(); // Jam saat ini (0-23)
+  const todayStr = now.toISOString().split("T")[0];
+
+  const allKdkmp = dashboardData.kdkmpList || [];
+
+  // A. KDKMP BELUM CLOSE SHIFT HARI INI (Hanya dicek jika Jam >= 17:00)
+  let missingCloseToday = [];
+  
+  if (currentHour >= 17) {
+    const filledCloseToday = new Set();
+    rows.forEach(row => {
+      const isSetor = String(row.status || '').toLowerCase().includes("setor");
+      if (!isSetor && row.date === todayStr) {
+        filledCloseToday.add(row.kdkmp);
+      }
+    });
+    missingCloseToday = allKdkmp.filter(k => !filledCloseToday.has(k));
+  }
+
+  // B. KDKMP BELUM SETOR OMSET H-3 KE BELAKANG (Per Tanggal Spesifik)
+  const checkDatesSetor = [];
+  for (let i = 3; i <= 5; i++) { // Mengecek H-3 s/d H-5
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    checkDatesSetor.push(d.toISOString().split("T")[0]);
+  }
+
+  const missingSetorDetails = [];
+
+  checkDatesSetor.forEach(tgl => {
+    const filledSetorOnDate = new Set();
+    rows.forEach(row => {
+      const isSetor = String(row.status || '').toLowerCase().includes("setor");
+      if (isSetor && row.date === tgl) {
+        filledSetorOnDate.add(row.kdkmp);
+      }
+    });
+
+    const unsubmitted = allKdkmp.filter(k => !filledSetorOnDate.has(k));
+    if (unsubmitted.length > 0) {
+      missingSetorDetails.push({
+        date: tgl,
+        outlets: unsubmitted
+      });
+    }
+  });
+
+  // RENDER PERINGATAN KETERLAMBATAN
+  if (missingCloseToday.length > 0 || missingSetorDetails.length > 0) {
+    let missingHtml = `<div style="background: #fff3df; border: 1px solid #ffeeba; color: #856404; padding: 14px; border-radius: 10px; font-size: 13px;">`;
+    missingHtml += `<strong><i class="fa-solid fa-circle-exclamation"></i> Monitoring Keterlambatan Pengisian:</strong><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 10px;">`;
+
+    // Alert Close Shift Hari Ini (Hanya Muncul Jam 17:00 Ke Atas)
+    if (missingCloseToday.length > 0) {
+      missingHtml += `<div style="background: rgba(255,255,255,0.7); padding: 10px; border-radius: 8px;">`;
+      missingHtml += `<strong style="color: #a71d2a;"><i class="fa-solid fa-clock"></i> Belum Close Shift Hari Ini (${formatDate(todayStr)}) [Total: ${missingCloseToday.length} Outlet]:</strong><ul style="margin: 6px 0 0 16px; padding: 0; max-height: 200px; overflow-y: auto;">`;
+      missingCloseToday.forEach(name => {
+        missingHtml += `<li><strong>${name.replaceAll("_", " ")}</strong> (Hari Ini: ${formatDate(todayStr)})</li>`;
+      });
+      missingHtml += `</ul></div>`;
+    }
+
+    // Alert Setor Omset H-3 Ke Belakang
+    if (missingSetorDetails.length > 0) {
+      missingHtml += `<div style="background: rgba(255,255,255,0.7); padding: 10px; border-radius: 8px;">`;
+      missingHtml += `<strong style="color: #a71d2a;"><i class="fa-solid fa-triangle-exclamation"></i> Belum Setor Omset (H-3 Ke Belakang):</strong><ul style="margin: 6px 0 0 16px; padding: 0; max-height: 200px; overflow-y: auto;">`;
+      
+      missingSetorDetails.forEach(item => {
+        item.outlets.forEach(name => {
+          missingHtml += `<li><strong>${name.replaceAll("_", " ")}</strong> — Belum Setor pertanggal <u>${formatDate(item.date)}</u></li>`;
+        });
+      });
+      
+      missingHtml += `</ul></div>`;
+    }
+
+    missingHtml += `</div></div>`;
+    alertContainer.innerHTML += missingHtml;
+  }
+}
+/* =========================================================
    UPDATE KPI CARDS
-========================= */
+========================================================= */
 function updateKPI(rows) {
   let closeShift = 0;
   let setorOmset = 0;
@@ -152,9 +282,9 @@ function updateKPI(rows) {
   if (document.getElementById("totalSelisih")) document.getElementById("totalSelisih").textContent = formatRupiah(selisih);
 }
 
-/* =========================
+/* =========================================================
    UPDATE OPERATIONAL KPI
-========================= */
+========================================================= */
 function updateOperational(data) {
   const operational = (data.operationalKdkmp || []).length;
   const total = data.totalKdkmp || 34;
@@ -166,9 +296,9 @@ function updateOperational(data) {
   createStatusChart(operational, belum);
 }
 
-/* =========================
+/* =========================================================
    TABEL REKAP SALES (WITH PAGINATION)
-========================= */
+========================================================= */
 function updateTable(rows) {
   const tbody = document.getElementById("salesTable");
   if (!tbody) return;
@@ -212,9 +342,9 @@ function updateTable(rows) {
   });
 }
 
-/* =========================
+/* =========================================================
    TABEL MENU KDKMP
-========================= */
+========================================================= */
 function renderKdkmpTable(kdkmpList, operationalList) {
   const tbody = document.getElementById("kdkmpTableBody");
   if (!tbody) return;
@@ -235,9 +365,9 @@ function renderKdkmpTable(kdkmpList, operationalList) {
   });
 }
 
-/* =========================
+/* =========================================================
    TABEL PERINGKAT OMSET (TERTINGGI KE TERENDAH)
-========================= */
+========================================================= */
 function renderRankingTable(rows) {
   const tbody = document.getElementById("rankingTableBody");
   if (!tbody) return;
@@ -301,9 +431,9 @@ function renderRankingTable(rows) {
   });
 }
 
-/* =========================
+/* =========================================================
    TABEL MENU CLOSE SHIFT (WITH PAGINATION)
-========================= */
+========================================================= */
 function renderCloseShiftTable(rows) {
   const tbody = document.getElementById("closeShiftTableBody");
   if (!tbody) return;
@@ -338,9 +468,9 @@ function renderCloseShiftTable(rows) {
   });
 }
 
-/* =========================
+/* =========================================================
    TABEL MENU SETORAN (WITH PAGINATION)
-========================= */
+========================================================= */
 function renderSetoranTable(rows) {
   const tbody = document.getElementById("setoranTableBody");
   if (!tbody) return;
@@ -375,9 +505,9 @@ function renderSetoranTable(rows) {
   });
 }
 
-/* =========================
+/* =========================================================
    HELPER PAGINASI PRESISI
-========================= */
+========================================================= */
 function renderPaginationControls(containerId, totalRows, currentPage, onPageChange) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -409,9 +539,9 @@ function renderPaginationControls(containerId, totalRows, currentPage, onPageCha
   });
 }
 
-/* =========================
+/* =========================================================
    CHARTS & FORMATTERS
-========================= */
+========================================================= */
 function updateDailyChart(rows) {
   const map = {};
   rows.forEach(row => {
@@ -471,9 +601,9 @@ function showLoading() {
   if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="loading">Memuat data dari Spreadsheet...</td></tr>`;
 }
 
-/* =========================
+/* =========================================================
    SIDEBAR NAVIGATION HANDLER
-========================= */
+========================================================= */
 function initSidebar() {
   const navItems = document.querySelectorAll(".nav-item");
   const sections = document.querySelectorAll(".page-section");
@@ -516,21 +646,16 @@ function initSidebar() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-  loadDashboard();
-  initSidebar();
-});
 /* =========================================================
-   INITALIZATION & AUTO-REFRESH (SETIAP 1 MENIT)
+   INITIALIZATION & AUTO-REFRESH (1 MENIT)
 ========================================================= */
 document.addEventListener("DOMContentLoaded", function() {
-  // 1. Muat dashboard saat pertama kali halaman dibuka
   loadDashboard();
   initSidebar();
 
-  // 2. Auto-refresh otomatis setiap 60.000 ms (1 menit)
+  // Auto Refresh Setiap 60 Detik (1 Menit)
   setInterval(function() {
     console.log("Auto-refreshing dashboard data...");
     loadDashboard();
-  }, 60000); // 60000 milidetik = 1 menit
+  }, 60000);
 });

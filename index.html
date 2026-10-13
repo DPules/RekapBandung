@@ -21,7 +21,7 @@
                 <span>Bandung Area</span>
             </div>
         </div>
-
+    
         <nav>
             <button class="nav-item active" data-target="sec-dashboard">
                 <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
@@ -42,13 +42,13 @@
                 <i class="fa-solid fa-table"></i> <span>Rekap Sales</span>
             </button>
         </nav>
-
+    
         <div class="sidebar-footer">
             Monitoring Sales
             <strong id="lastUpdate">Update: -</strong>
         </div>
     </aside>
-
+    
     <!-- MAIN CONTENT -->
     <main class="main">
         <header class="topbar">
@@ -56,7 +56,7 @@
                 <h1 id="pageTitle">Dashboard Sales</h1>
                 <p id="pageSub">Monitoring operasional dan setoran KDKMP Area Bandung</p>
             </div>
-
+    
             <div style="display: flex; gap: 10px;">
                 <a href="input.html" class="refresh-btn" style="text-decoration: none; background: #18864b;">
                     <i class="fa-solid fa-plus"></i> Input Setoran
@@ -66,7 +66,7 @@
                 </button>
             </div>
         </header>
-
+    
         <!-- FILTER GLOBAL (TAMPIL DI SEMUA MENU SIDEBAR) -->
         <div class="filter-card">
             <div class="filter-title"><i class="fa-solid fa-filter"></i> Filter Data</div>
@@ -97,9 +97,12 @@
                     Tampilkan</button>
             </div>
         </div>
-
+    
         <!-- SECTION 1: DASHBOARD UTAMA -->
         <section id="sec-dashboard" class="page-section active-section">
+            <!-- ALERT NOTIFIKASI SYSTEM (DOUBLE INPUT & BELUM MENGISI) -->
+            <div id="alertContainer" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;"></div>
+    
             <div class="kpi-grid">
                 <div class="kpi-card">
                     <div class="kpi-icon"><i class="fa-solid fa-store"></i></div>
@@ -126,7 +129,7 @@
                     <div><span>Selisih</span><strong id="totalSelisih">Rp 0</strong></div>
                 </div>
             </div>
-
+    
             <div class="chart-grid">
                 <div class="chart-card">
                     <div class="chart-header">
@@ -148,7 +151,7 @@
                 </div>
             </div>
         </section>
-
+    
         <!-- SECTION 2: MENU KDKMP -->
         <section id="sec-kdkmp" class="page-section">
             <div class="table-card">
@@ -176,7 +179,7 @@
                 </div>
             </div>
         </section>
-
+    
         <!-- SECTION 3: MENU PERINGKAT OMSET -->
         <section id="sec-ranking" class="page-section">
             <div class="table-card">
@@ -207,7 +210,7 @@
                 <div id="rankingPagination"></div>
             </div>
         </section>
-
+    
         <!-- SECTION 4: MENU CLOSE SHIFT -->
         <section id="sec-closeshift" class="page-section">
             <div class="table-card">
@@ -238,7 +241,7 @@
                 <div id="closeShiftPagination"></div>
             </div>
         </section>
-
+    
         <!-- SECTION 5: MENU SETORAN -->
         <section id="sec-setoran" class="page-section">
             <div class="table-card">
@@ -269,7 +272,7 @@
                 <div id="setoranPagination"></div>
             </div>
         </section>
-
+    
         <!-- SECTION 6: REKAP SALES -->
         <section id="sec-rekap" class="page-section">
             <div class="table-card">
@@ -304,8 +307,5 @@
             </div>
         </section>
     </main>
-
+    
     <script src="script.js"></script>
-</body>
-
-</html>

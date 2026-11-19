@@ -14,6 +14,91 @@ let currentPageSetor = 1;
 let currentPageRanking = 1;
 
 /* =========================================================
+   MAPPING WILAYAH KDKMP (BANDUNG BARAT VS KAB. BANDUNG)
+   (Tambahkan kata kunci nama kecamatan/desa jika ada yang spesifik)
+========================================================= */
+const AREA_MAPPING = {
+  BANDUNG_BARAT: [
+    "Lembang", "Parongpong", "Cisarua", "Cikalongwetan", "Cipeundeuy",
+    "Ngamprah", "Cipatat", "Padalarang", "Batujajar", "Cihampelas",
+    "Cililin", "Cipongkor", "Rongga", "Sindangkerta", "Gununghalu", "Saguling",
+    "Cihanjuang", "Gadobangkong", "Cibodas", "Laksana", "Mekarsari", "Kertamulya"
+  ],
+  KAB_BANDUNG: [
+    "Nagreg", "Cicalengka", "Rancaekek", "Majalaya", "Cikancung",
+    "Paseh", "Ibun", "Soreang", "Katapang", "Banjaran", "Arjasari",
+    "Pameungpeuk", "Pangalengan", "Kertasari", "Pacet", "Ciparay",
+    "Baleendah", "Dayeuhkolot", "Bojongsoang", "Margahayu", "Margaasih",
+    "Ciwidey", "Rancabali", "Pasirjambu", "Cimaung", "Cileunyi", "Cilengkrang", "Cimenyan",
+    "Cipeujeuh", "Citaman", "Bojongloa", "Sukamaju"
+  ]
+};
+
+// Mendeteksi Area dari nama KDKMP
+function getKdkmpArea(kdkmpName) {
+  const clean = String(kdkmpName || '').toLowerCase().replace(/_/g, ' ');
+  
+  const isKBB = AREA_MAPPING.BANDUNG_BARAT.some(key => clean.includes(key.toLowerCase()));
+  if (isKBB) return "BANDUNG_BARAT";
+
+  const isKabBandung = AREA_MAPPING.KAB_BANDUNG.some(key => clean.includes(key.toLowerCase()));
+  if (isKabBandung) return "KAB_BANDUNG";
+
+  return "KAB_BANDUNG"; // Default fallback
+}
+
+function getAreaBadge(areaCode) {
+  if (areaCode === "BANDUNG_BARAT") {
+    return `<span class="area-badge area-kbb">Bandung Barat</span>`;
+  }
+  return `<span class="area-badge area-kab">Kab. Bandung</span>`;
+}
+
+/* =========================================================
+   HELPER FORMAT TANGGAL (DD-MM-YYYY <-> YYYY-MM-DD)
+========================================================= */
+function toISODate(dateVal) {
+  if (!dateVal) return "";
+  let str = String(dateVal).trim();
+
+  if (str.includes("-") || str.includes("/")) {
+    const delimiter = str.includes("-") ? "-" : "/";
+    const parts = str.split(delimiter);
+
+    if (parts.length === 3) {
+      // Format DD-MM-YYYY atau DD/MM/YYYY -> YYYY-MM-DD
+      if (parts[0].length <= 2 && parts[2].length === 4) {
+        const dd = parts[0].padStart(2, '0');
+        const mm = parts[1].padStart(2, '0');
+        const yyyy = parts[2];
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      // Sudah YYYY-MM-DD
+      if (parts[0].length === 4 && parts[2].length <= 2) {
+        return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      }
+    }
+  }
+
+  const d = new Date(dateVal);
+  if (!isNaN(d.getTime())) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  return str;
+}
+
+function formatDate(dateVal) {
+  const iso = toISODate(dateVal);
+  if (!iso) return "-";
+  const parts = iso.split("-");
+  return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : iso;
+}
+
+/* =========================================================
    LOAD DASHBOARD (FETCH API)
 ========================================================= */
 function loadDashboard() {
@@ -30,7 +115,7 @@ function loadDashboard() {
       console.error("Gagal mengambil data dari Spreadsheet:", error);
       const tbody = document.getElementById("salesTable");
       if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="8" class="loading" style="color:red;">Gagal mengambil data dari Spreadsheet.<br><small>${error.message}</small></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="loading" style="color:red;">Gagal mengambil data dari Spreadsheet.<br><small>${error.message}</small></td></tr>`;
       }
     });
 }
@@ -39,17 +124,8 @@ function loadDashboard() {
    INITIALIZE DASHBOARD
 ========================================================= */
 function initializeDashboard(data) {
-  const totalKdkmpEl = document.getElementById("totalKdkmp");
-  if (totalKdkmpEl) totalKdkmpEl.textContent = data.totalKdkmp || 34;
-
-  populateKdkmpFilter(data.kdkmpList || []);
-  renderKdkmpTable(data.kdkmpList || [], data.operationalKdkmp || []);
-
-  // Set default tanggal ke Bulan Berjalan
   setDefaultDates();
-
-  applyFilter();
-  updateOperational(data);
+  onAreaChange();
   updateLastUpdate();
 }
 
@@ -73,32 +149,71 @@ function setDefaultDates() {
 }
 
 /* =========================================================
-   FILTER DROPDOWN KDKMP
+   HANDLER PERUBAHAN FILTER AREA
 ========================================================= */
+function onAreaChange() {
+  if (!dashboardData) return;
+  const selectedArea = document.getElementById("areaFilter")?.value || "ALL";
+
+  // Update teks label subjudul area
+  const sidebarSub = document.getElementById("sidebarAreaSubtitle");
+  const chartSub = document.getElementById("chartStatusSub");
+  if (selectedArea === "BANDUNG_BARAT") {
+    if (sidebarSub) sidebarSub.textContent = "Area Bandung Barat";
+    if (chartSub) chartSub.textContent = "Operasional Area Bandung Barat";
+  } else if (selectedArea === "KAB_BANDUNG") {
+    if (sidebarSub) sidebarSub.textContent = "Area Kab. Bandung";
+    if (chartSub) chartSub.textContent = "Operasional Area Kab. Bandung";
+  } else {
+    if (sidebarSub) sidebarSub.textContent = "Bandung Area";
+    if (chartSub) chartSub.textContent = "Operasional Seluruh Area";
+  }
+
+  // Sesuaikan dropdown KDKMP berdasarkan area terpilih
+  const filteredKdkmpList = (dashboardData.kdkmpList || []).filter(name => {
+    if (selectedArea === "ALL") return true;
+    return getKdkmpArea(name) === selectedArea;
+  });
+
+  populateKdkmpFilter(filteredKdkmpList);
+  applyFilter();
+}
+
 function populateKdkmpFilter(list) {
   const select = document.getElementById("kdkmpFilter");
   if (!select) return;
   
+  const currentVal = select.value;
   select.innerHTML = `<option value="ALL">Semua KDKMP</option>`;
   list.forEach(name => {
     select.innerHTML += `<option value="${name}">${name.replaceAll("_", " ")}</option>`;
   });
+
+  if (list.includes(currentVal)) {
+    select.value = currentVal;
+  }
 }
 
 /* =========================================================
-   APPLY FILTER & SORTING (TERBARU DI ATAS)
+   APPLY FILTER & RENDER SEMUA KOMPONEN
 ========================================================= */
 function applyFilter() {
   if (!dashboardData || !dashboardData.rows) return;
 
-  const start = document.getElementById("startDate") ? document.getElementById("startDate").value : "";
-  const end = document.getElementById("endDate") ? document.getElementById("endDate").value : "";
-  const kdkmp = document.getElementById("kdkmpFilter") ? document.getElementById("kdkmpFilter").value : "ALL";
-  const status = document.getElementById("statusFilter") ? document.getElementById("statusFilter").value : "ALL";
+  const start = document.getElementById("startDate")?.value || "";
+  const end = document.getElementById("endDate")?.value || "";
+  const area = document.getElementById("areaFilter")?.value || "ALL";
+  const kdkmp = document.getElementById("kdkmpFilter")?.value || "ALL";
+  const status = document.getElementById("statusFilter")?.value || "ALL";
 
   filteredRows = dashboardData.rows.filter(row => {
-    if (start && row.date && row.date < start) return false;
-    if (end && row.date && row.date > end) return false;
+    const rowDateISO = toISODate(row.date);
+    if (start && rowDateISO && rowDateISO < start) return false;
+    if (end && rowDateISO && rowDateISO > end) return false;
+    
+    // Filter Area Wilayah
+    if (area !== "ALL" && getKdkmpArea(row.kdkmp) !== area) return false;
+    
     if (kdkmp !== "ALL" && row.kdkmp !== kdkmp) return false;
 
     if (status !== "ALL") {
@@ -109,10 +224,10 @@ function applyFilter() {
     return true;
   });
 
-  // Sorting Tanggal Terbaru ke Terlama
-  filteredRows.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+  // Urutkan Tanggal Terbaru ke Terlama
+  filteredRows.sort((a, b) => new Date(toISODate(b.date) || 0) - new Date(toISODate(a.date) || 0));
 
-  // Reset Halaman Paginasi ke 1
+  // Reset Halaman Paginasi
   currentPageSales = 1;
   currentPageClose = 1;
   currentPageSetor = 1;
@@ -120,34 +235,38 @@ function applyFilter() {
 
   updateKPI(filteredRows);
   updateDailyChart(filteredRows);
+  updateOperationalByArea(area);
 
+  renderKdkmpTableByArea(area);
   updateTable(filteredRows);
   renderCloseShiftTable(filteredRows);
   renderSetoranTable(filteredRows);
-  renderRankingTable(filteredRows);
+  renderRankingTable(filteredRows, area);
 
-  // Evaluasi Alert System (Double Input, H-1 Close, H-3 Setor)
-  checkSystemAlerts(filteredRows, start, end);
+  // Evaluasi Notifikasi Sistem berdasarkan Area
+  checkSystemAlerts(filteredRows, area);
 }
 
 /* =========================================================
-   DETEKSI DOUBLE INPUT & KDKMP BELUM MENGISI (HARI INI > 17:00 & H-3)
+   DETEKSI DOUBLE INPUT & KDKMP BELUM MENGISI (SESUAI AREA & TGL OPERASIONAL)
 ========================================================= */
-function checkSystemAlerts(rows, startDate, endDate) {
+function checkSystemAlerts(rows, selectedArea = "ALL") {
   const alertContainer = document.getElementById("alertContainer");
   if (!alertContainer) return;
 
   alertContainer.innerHTML = "";
 
-  // 1. DETEKSI DOUBLE INPUT (Satu Tanggal, KDKMP Sama, Jenis Sama > 1)
+  // 1. DETEKSI DOUBLE INPUT (Dalam area & filter yang aktif)
   const inputTracker = {};
   const duplicates = [];
 
   rows.forEach(row => {
-    if (!row.date || !row.kdkmp) return;
+    const rowDateISO = toISODate(row.date);
+    if (!rowDateISO || !row.kdkmp) return;
+    
     const isSetor = String(row.status || '').toLowerCase().includes("setor");
     const typeKey = isSetor ? "Setor Omset" : "Close Shift";
-    const key = `${row.date}_${row.kdkmp}_${typeKey}`;
+    const key = `${rowDateISO}_${row.kdkmp.trim().toLowerCase()}_${typeKey}`;
 
     if (!inputTracker[key]) {
       inputTracker[key] = 1;
@@ -155,7 +274,7 @@ function checkSystemAlerts(rows, startDate, endDate) {
       inputTracker[key]++;
       if (inputTracker[key] === 2) {
         duplicates.push({
-          date: row.date,
+          date: rowDateISO,
           kdkmp: row.kdkmp,
           type: typeKey
         });
@@ -168,54 +287,106 @@ function checkSystemAlerts(rows, startDate, endDate) {
     dupHtml += `<strong><i class="fa-solid fa-triangle-exclamation"></i> Terdeteksi Pengisian Ganda (Double Input):</strong><ul style="margin: 8px 0 0 18px; padding: 0;">`;
     
     duplicates.forEach(dup => {
-      dupHtml += `<li><strong>${dup.kdkmp.replaceAll("_", " ")}</strong> mengisi <u>${dup.type}</u> lebih dari 1 kali pada tanggal <strong>${formatDate(dup.date)}</strong></li>`;
+      const badge = getAreaBadge(getKdkmpArea(dup.kdkmp));
+      dupHtml += `<li><strong>${dup.kdkmp.replaceAll("_", " ")}</strong> ${badge} mengisi <u>${dup.type}</u> lebih dari 1 kali pada tanggal <strong>${formatDate(dup.date)}</strong></li>`;
     });
     
     dupHtml += `</ul></div>`;
     alertContainer.innerHTML += dupHtml;
   }
 
-  // 2. LOGIKA PENGECEKAN TANGGAL HARI INI & JAM > 17:00
+  // 2. PETAKAN TANGGAL OPERASIONAL PERTAMA MASING-MASING KDKMP (Dari seluruh database)
+  const kdkmpFirstDateMap = {};
+  (dashboardData.rows || []).forEach(row => {
+    const rowDateISO = toISODate(row.date);
+    if (row.kdkmp && rowDateISO) {
+      const cleanName = row.kdkmp.trim().toLowerCase();
+      if (!kdkmpFirstDateMap[cleanName] || rowDateISO < kdkmpFirstDateMap[cleanName]) {
+        kdkmpFirstDateMap[cleanName] = rowDateISO;
+      }
+    }
+  });
+
   const now = new Date();
-  const currentHour = now.getHours(); // Jam saat ini (0-23)
-  const todayStr = now.toISOString().split("T")[0];
+  const currentHour = now.getHours();
+  const todayStr = toISODate(now);
 
-  const allKdkmp = dashboardData.kdkmpList || [];
+  // Filter daftar KDKMP operasional sesuai Area Wilayah yang dipilih
+  const activeKdkmp = (dashboardData.operationalKdkmp || []).filter(k => {
+    if (selectedArea === "ALL") return true;
+    return getKdkmpArea(k) === selectedArea;
+  });
 
-  // A. KDKMP BELUM CLOSE SHIFT HARI INI (Hanya dicek jika Jam >= 17:00)
-  let missingCloseToday = [];
-  
+  if (!activeKdkmp.length) return;
+
+  // Tanggal 1 bulan ini s/d kemarin
+  const datesMonthToYesterday = [];
+  const yyyy = now.getFullYear();
+  const mm = now.getMonth();
+  const currentDateNum = now.getDate();
+
+  for (let d = 1; d < currentDateNum; d++) {
+    const dateObj = new Date(yyyy, mm, d);
+    datesMonthToYesterday.push(toISODate(dateObj));
+  }
+
+  // Gunakan seluruh rows untuk pengecekan kelengkapan input
+  const allRowsInArea = (dashboardData.rows || []).filter(r => 
+    selectedArea === "ALL" || getKdkmpArea(r.kdkmp) === selectedArea
+  );
+
+  // A. LOGIKA CLOSE SHIFT (Hari Ini >= 17:00 & Bulan Ini)
+  const checkDatesClose = [...datesMonthToYesterday];
   if (currentHour >= 17) {
-    const filledCloseToday = new Set();
-    rows.forEach(row => {
+    checkDatesClose.push(todayStr);
+  }
+
+  const missingCloseDetails = [];
+  checkDatesClose.reverse().forEach(tgl => {
+    const filledCloseOnDate = new Set();
+    allRowsInArea.forEach(row => {
+      const rowDateISO = toISODate(row.date);
       const isSetor = String(row.status || '').toLowerCase().includes("setor");
-      if (!isSetor && row.date === todayStr) {
-        filledCloseToday.add(row.kdkmp);
+      if (!isSetor && rowDateISO === tgl && row.kdkmp) {
+        filledCloseOnDate.add(row.kdkmp.trim().toLowerCase());
       }
     });
-    missingCloseToday = allKdkmp.filter(k => !filledCloseToday.has(k));
-  }
 
-  // B. KDKMP BELUM SETOR OMSET H-3 KE BELAKANG (Per Tanggal Spesifik)
-  const checkDatesSetor = [];
-  for (let i = 3; i <= 5; i++) { // Mengecek H-3 s/d H-5
-    const d = new Date(now);
-    d.setDate(now.getDate() - i);
-    checkDatesSetor.push(d.toISOString().split("T")[0]);
-  }
+    const unsubmitted = activeKdkmp.filter(k => {
+      const cleanK = k.trim().toLowerCase();
+      const firstDate = kdkmpFirstDateMap[cleanK];
+      return firstDate && firstDate <= tgl && !filledCloseOnDate.has(cleanK);
+    });
 
+    if (unsubmitted.length > 0) {
+      missingCloseDetails.push({
+        date: tgl,
+        isToday: (tgl === todayStr),
+        outlets: unsubmitted
+      });
+    }
+  });
+
+  // B. LOGIKA SETOR OMSET (Seluruh Hari di Bulan Ini s/d Kemarin)
+  const checkDatesSetor = [...datesMonthToYesterday];
   const missingSetorDetails = [];
 
-  checkDatesSetor.forEach(tgl => {
+  checkDatesSetor.reverse().forEach(tgl => {
     const filledSetorOnDate = new Set();
-    rows.forEach(row => {
+    allRowsInArea.forEach(row => {
+      const rowDateISO = toISODate(row.date);
       const isSetor = String(row.status || '').toLowerCase().includes("setor");
-      if (isSetor && row.date === tgl) {
-        filledSetorOnDate.add(row.kdkmp);
+      if (isSetor && rowDateISO === tgl && row.kdkmp) {
+        filledSetorOnDate.add(row.kdkmp.trim().toLowerCase());
       }
     });
 
-    const unsubmitted = allKdkmp.filter(k => !filledSetorOnDate.has(k));
+    const unsubmitted = activeKdkmp.filter(k => {
+      const cleanK = k.trim().toLowerCase();
+      const firstDate = kdkmpFirstDateMap[cleanK];
+      return firstDate && firstDate <= tgl && !filledSetorOnDate.has(cleanK);
+    });
+
     if (unsubmitted.length > 0) {
       missingSetorDetails.push({
         date: tgl,
@@ -225,28 +396,36 @@ function checkSystemAlerts(rows, startDate, endDate) {
   });
 
   // RENDER PERINGATAN KETERLAMBATAN
-  if (missingCloseToday.length > 0 || missingSetorDetails.length > 0) {
+  if (missingCloseDetails.length > 0 || missingSetorDetails.length > 0) {
+    const areaTitle = selectedArea === "BANDUNG_BARAT" ? "Area Bandung Barat" : (selectedArea === "KAB_BANDUNG" ? "Area Kab. Bandung" : "Semua Area");
     let missingHtml = `<div style="background: #fff3df; border: 1px solid #ffeeba; color: #856404; padding: 14px; border-radius: 10px; font-size: 13px;">`;
-    missingHtml += `<strong><i class="fa-solid fa-circle-exclamation"></i> Monitoring Keterlambatan Pengisian:</strong><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 10px;">`;
+    missingHtml += `<strong><i class="fa-solid fa-circle-exclamation"></i> Monitoring Keterlambatan Pengisian (${areaTitle}):</strong><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 10px;">`;
 
-    // Alert Close Shift Hari Ini (Hanya Muncul Jam 17:00 Ke Atas)
-    if (missingCloseToday.length > 0) {
-      missingHtml += `<div style="background: rgba(255,255,255,0.7); padding: 10px; border-radius: 8px;">`;
-      missingHtml += `<strong style="color: #a71d2a;"><i class="fa-solid fa-clock"></i> Belum Close Shift Hari Ini (${formatDate(todayStr)}) [Total: ${missingCloseToday.length} Outlet]:</strong><ul style="margin: 6px 0 0 16px; padding: 0; max-height: 200px; overflow-y: auto;">`;
-      missingCloseToday.forEach(name => {
-        missingHtml += `<li><strong>${name.replaceAll("_", " ")}</strong> (Hari Ini: ${formatDate(todayStr)})</li>`;
+    // Alert Close Shift
+    if (missingCloseDetails.length > 0) {
+      missingHtml += `<div style="background: rgba(255,255,255,0.75); padding: 10px; border-radius: 8px;">`;
+      missingHtml += `<strong style="color: #a71d2a;"><i class="fa-solid fa-clock"></i> Belum Close Shift (Bulan Ini):</strong><ul style="margin: 6px 0 0 16px; padding: 0; max-height: 220px; overflow-y: auto;">`;
+      
+      missingCloseDetails.forEach(item => {
+        const labelHari = item.isToday ? " <strong>(Hari Ini)</strong>" : "";
+        item.outlets.forEach(name => {
+          const badge = selectedArea === "ALL" ? getAreaBadge(getKdkmpArea(name)) : "";
+          missingHtml += `<li><strong>${name.replaceAll("_", " ")}</strong>${badge} — Belum Close Shift pertanggal <u>${formatDate(item.date)}</u>${labelHari}</li>`;
+        });
       });
+
       missingHtml += `</ul></div>`;
     }
 
-    // Alert Setor Omset H-3 Ke Belakang
+    // Alert Setor Omset
     if (missingSetorDetails.length > 0) {
-      missingHtml += `<div style="background: rgba(255,255,255,0.7); padding: 10px; border-radius: 8px;">`;
-      missingHtml += `<strong style="color: #a71d2a;"><i class="fa-solid fa-triangle-exclamation"></i> Belum Setor Omset (H-3 Ke Belakang):</strong><ul style="margin: 6px 0 0 16px; padding: 0; max-height: 200px; overflow-y: auto;">`;
+      missingHtml += `<div style="background: rgba(255,255,255,0.75); padding: 10px; border-radius: 8px;">`;
+      missingHtml += `<strong style="color: #a71d2a;"><i class="fa-solid fa-triangle-exclamation"></i> Belum Setor Omset (Bulan Ini):</strong><ul style="margin: 6px 0 0 16px; padding: 0; max-height: 220px; overflow-y: auto;">`;
       
       missingSetorDetails.forEach(item => {
         item.outlets.forEach(name => {
-          missingHtml += `<li><strong>${name.replaceAll("_", " ")}</strong> — Belum Setor pertanggal <u>${formatDate(item.date)}</u></li>`;
+          const badge = selectedArea === "ALL" ? getAreaBadge(getKdkmpArea(name)) : "";
+          missingHtml += `<li><strong>${name.replaceAll("_", " ")}</strong>${badge} — Belum Setor pertanggal <u>${formatDate(item.date)}</u></li>`;
         });
       });
       
@@ -257,8 +436,9 @@ function checkSystemAlerts(rows, startDate, endDate) {
     alertContainer.innerHTML += missingHtml;
   }
 }
+
 /* =========================================================
-   UPDATE KPI CARDS
+   UPDATE KPI CARDS & OPERATIONAL PER AREA
 ========================================================= */
 function updateKPI(rows) {
   let closeShift = 0;
@@ -282,14 +462,21 @@ function updateKPI(rows) {
   if (document.getElementById("totalSelisih")) document.getElementById("totalSelisih").textContent = formatRupiah(selisih);
 }
 
-/* =========================================================
-   UPDATE OPERATIONAL KPI
-========================================================= */
-function updateOperational(data) {
-  const operational = (data.operationalKdkmp || []).length;
-  const total = data.totalKdkmp || 34;
-  const belum = total - operational < 0 ? 0 : total - operational;
+function updateOperationalByArea(selectedArea) {
+  if (!dashboardData) return;
 
+  const allList = (dashboardData.kdkmpList || []).filter(k => 
+    selectedArea === "ALL" || getKdkmpArea(k) === selectedArea
+  );
+  const opList = (dashboardData.operationalKdkmp || []).filter(k => 
+    selectedArea === "ALL" || getKdkmpArea(k) === selectedArea
+  );
+
+  const total = selectedArea === "ALL" ? (dashboardData.totalKdkmp || allList.length) : allList.length;
+  const operational = opList.length;
+  const belum = Math.max(0, total - operational);
+
+  if (document.getElementById("totalKdkmp")) document.getElementById("totalKdkmp").textContent = total;
   if (document.getElementById("operasional")) document.getElementById("operasional").textContent = operational;
   if (document.getElementById("belumOperasional")) document.getElementById("belumOperasional").textContent = belum;
 
@@ -297,68 +484,42 @@ function updateOperational(data) {
 }
 
 /* =========================================================
-   TABEL REKAP SALES (WITH PAGINATION)
+   TABEL MENU KDKMP (PER AREA + TANGGAL MULAI OPERASIONAL)
 ========================================================= */
-function updateTable(rows) {
-  const tbody = document.getElementById("salesTable");
-  if (!tbody) return;
-
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="loading">Tidak ada data transaksi.</td></tr>`;
-    renderPaginationControls("salesPagination", 0, 1, () => {});
-    return;
-  }
-
-  const startIdx = (currentPageSales - 1) * ROWS_PER_PAGE;
-  const pageRows = rows.slice(startIdx, startIdx + ROWS_PER_PAGE);
-
-  tbody.innerHTML = "";
-  pageRows.forEach((row, index) => {
-    const proof = (row.bukti && row.bukti.startsWith("http")) ? `<a class="proof-btn" href="${row.bukti}" target="_blank">Bukti</a>` : "-";
-    const isSetor = String(row.status || '').toLowerCase().includes("setor");
-    const badgeClass = !isSetor ? "badge-success" : "badge-warning";
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${startIdx + index + 1}</td>
-      <td>${formatDate(row.date)}</td>
-      <td>${row.kdkmp ? row.kdkmp.replaceAll("_", " ") : "-"}</td>
-      <td>${!isSetor ? formatRupiah(row.nominal) : "-"}</td>
-      <td>${isSetor ? formatRupiah(row.nominal) : "-"}</td>
-      <td>${!isSetor ? formatRupiah(row.nominal) : "-" + formatRupiah(row.nominal)}</td>
-      <td><span class="badge ${badgeClass}">${row.status || 'Close Shift'}</span></td>
-      <td>${proof}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  if (document.getElementById("tableInfo")) {
-    document.getElementById("tableInfo").textContent = `${rows.length} transaksi (${currentPageSales}/${Math.ceil(rows.length / ROWS_PER_PAGE)} hal)`;
-  }
-
-  renderPaginationControls("salesPagination", rows.length, currentPageSales, (newPage) => {
-    currentPageSales = newPage;
-    updateTable(rows);
-  });
-}
-
-/* =========================================================
-   TABEL MENU KDKMP
-========================================================= */
-function renderKdkmpTable(kdkmpList, operationalList) {
+function renderKdkmpTableByArea(selectedArea) {
   const tbody = document.getElementById("kdkmpTableBody");
-  if (!tbody) return;
+  if (!tbody || !dashboardData) return;
   tbody.innerHTML = "";
+
+  // Hitung tanggal transaksi pertama per outlet
+  const firstDateMap = {};
+  (dashboardData.rows || []).forEach(r => {
+    const iso = toISODate(r.date);
+    if (r.kdkmp && iso) {
+      if (!firstDateMap[r.kdkmp] || iso < firstDateMap[r.kdkmp]) {
+        firstDateMap[r.kdkmp] = iso;
+      }
+    }
+  });
+
+  const kdkmpList = (dashboardData.kdkmpList || []).filter(k => 
+    selectedArea === "ALL" || getKdkmpArea(k) === selectedArea
+  );
+  const operationalList = dashboardData.operationalKdkmp || [];
 
   kdkmpList.forEach((name, index) => {
     const isOperational = operationalList.includes(name);
     const badgeClass = isOperational ? "badge-success" : "badge-warning";
     const statusText = isOperational ? "Operasional" : "Belum Operasional";
+    const areaBadge = getAreaBadge(getKdkmpArea(name));
+    const startOpDate = firstDateMap[name] ? formatDate(firstDateMap[name]) : "-";
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${index + 1}</td>
       <td><strong>${name.replaceAll("_", " ")}</strong></td>
+      <td>${areaBadge}</td>
+      <td>${startOpDate}</td>
       <td><span class="badge ${badgeClass}">${statusText}</span></td>
     `;
     tbody.appendChild(tr);
@@ -366,15 +527,17 @@ function renderKdkmpTable(kdkmpList, operationalList) {
 }
 
 /* =========================================================
-   TABEL PERINGKAT OMSET (TERTINGGI KE TERENDAH)
+   TABEL PERINGKAT OMSET
 ========================================================= */
-function renderRankingTable(rows) {
+function renderRankingTable(rows, selectedArea = "ALL") {
   const tbody = document.getElementById("rankingTableBody");
   if (!tbody) return;
 
   const mapKdkmp = {};
   (dashboardData.kdkmpList || []).forEach(kdkmp => {
-    mapKdkmp[kdkmp] = { close: 0, setor: 0 };
+    if (selectedArea === "ALL" || getKdkmpArea(kdkmp) === selectedArea) {
+      mapKdkmp[kdkmp] = { close: 0, setor: 0 };
+    }
   });
 
   rows.forEach(row => {
@@ -391,13 +554,14 @@ function renderRankingTable(rows) {
 
   const rankingList = Object.keys(mapKdkmp).map(kdkmp => ({
     kdkmp: kdkmp,
+    area: getKdkmpArea(kdkmp),
     close: mapKdkmp[kdkmp].close,
     setor: mapKdkmp[kdkmp].setor,
     selisih: mapKdkmp[kdkmp].close - mapKdkmp[kdkmp].setor
   })).sort((a, b) => b.close - a.close);
 
   if (!rankingList.length) {
-    tbody.innerHTML = `<tr><td colspan="5" class="loading">Tidak ada data peringkat.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="loading">Tidak ada data peringkat.</td></tr>`;
     renderPaginationControls("rankingPagination", 0, 1, () => {});
     return;
   }
@@ -418,6 +582,7 @@ function renderRankingTable(rows) {
     tr.innerHTML = `
       <td>${rankBadge}</td>
       <td><strong>${item.kdkmp.replaceAll("_", " ")}</strong></td>
+      <td>${getAreaBadge(item.area)}</td>
       <td><strong style="color: #18864b;">${formatRupiah(item.close)}</strong></td>
       <td><strong style="color: #087da5;">${formatRupiah(item.setor)}</strong></td>
       <td><strong>${formatRupiah(item.selisih)}</strong></td>
@@ -427,12 +592,60 @@ function renderRankingTable(rows) {
 
   renderPaginationControls("rankingPagination", rankingList.length, currentPageRanking, (newPage) => {
     currentPageRanking = newPage;
-    renderRankingTable(rows);
+    renderRankingTable(rows, selectedArea);
   });
 }
 
 /* =========================================================
-   TABEL MENU CLOSE SHIFT (WITH PAGINATION)
+   TABEL REKAP SALES
+========================================================= */
+function updateTable(rows) {
+  const tbody = document.getElementById("salesTable");
+  if (!tbody) return;
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="9" class="loading">Tidak ada data transaksi.</td></tr>`;
+    renderPaginationControls("salesPagination", 0, 1, () => {});
+    return;
+  }
+
+  const startIdx = (currentPageSales - 1) * ROWS_PER_PAGE;
+  const pageRows = rows.slice(startIdx, startIdx + ROWS_PER_PAGE);
+
+  tbody.innerHTML = "";
+  pageRows.forEach((row, index) => {
+    const proof = (row.bukti && row.bukti.startsWith("http")) ? `<a class="proof-btn" href="${row.bukti}" target="_blank">Bukti</a>` : "-";
+    const isSetor = String(row.status || '').toLowerCase().includes("setor");
+    const badgeClass = !isSetor ? "badge-success" : "badge-warning";
+    const areaBadge = getAreaBadge(getKdkmpArea(row.kdkmp));
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${startIdx + index + 1}</td>
+      <td>${formatDate(row.date)}</td>
+      <td>${row.kdkmp ? row.kdkmp.replaceAll("_", " ") : "-"}</td>
+      <td>${areaBadge}</td>
+      <td>${!isSetor ? formatRupiah(row.nominal) : "-"}</td>
+      <td>${isSetor ? formatRupiah(row.nominal) : "-"}</td>
+      <td>${!isSetor ? formatRupiah(row.nominal) : "-" + formatRupiah(row.nominal)}</td>
+      <td><span class="badge ${badgeClass}">${row.status || 'Close Shift'}</span></td>
+      <td>${proof}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (document.getElementById("tableInfo")) {
+    document.getElementById("tableInfo").textContent = `${rows.length} transaksi (${currentPageSales}/${Math.ceil(rows.length / ROWS_PER_PAGE)} hal)`;
+  }
+
+  renderPaginationControls("salesPagination", rows.length, currentPageSales, (newPage) => {
+    currentPageSales = newPage;
+    updateTable(rows);
+  });
+}
+
+/* =========================================================
+   TABEL CLOSE SHIFT & SETORAN
 ========================================================= */
 function renderCloseShiftTable(rows) {
   const tbody = document.getElementById("closeShiftTableBody");
@@ -440,7 +653,7 @@ function renderCloseShiftTable(rows) {
 
   const closeRows = rows.filter(row => !String(row.status || '').toLowerCase().includes("setor"));
   if (!closeRows.length) {
-    tbody.innerHTML = `<tr><td colspan="5" class="loading">Belum ada transaksi close shift.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="loading">Belum ada transaksi close shift.</td></tr>`;
     renderPaginationControls("closeShiftPagination", 0, 1, () => {});
     return;
   }
@@ -456,6 +669,7 @@ function renderCloseShiftTable(rows) {
       <td>${startIdx + index + 1}</td>
       <td>${formatDate(row.date)}</td>
       <td><strong>${row.kdkmp ? row.kdkmp.replaceAll("_", " ") : "-"}</strong></td>
+      <td>${getAreaBadge(getKdkmpArea(row.kdkmp))}</td>
       <td><strong style="color: #18864b;">${formatRupiah(row.nominal)}</strong></td>
       <td>${proof}</td>
     `;
@@ -468,16 +682,13 @@ function renderCloseShiftTable(rows) {
   });
 }
 
-/* =========================================================
-   TABEL MENU SETORAN (WITH PAGINATION)
-========================================================= */
 function renderSetoranTable(rows) {
   const tbody = document.getElementById("setoranTableBody");
   if (!tbody) return;
 
   const setoranRows = rows.filter(row => String(row.status || '').toLowerCase().includes("setor"));
   if (!setoranRows.length) {
-    tbody.innerHTML = `<tr><td colspan="5" class="loading">Belum ada transaksi setor omset.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="loading">Belum ada transaksi setor omset.</td></tr>`;
     renderPaginationControls("setoranPagination", 0, 1, () => {});
     return;
   }
@@ -493,6 +704,7 @@ function renderSetoranTable(rows) {
       <td>${startIdx + index + 1}</td>
       <td>${formatDate(row.date)}</td>
       <td><strong>${row.kdkmp ? row.kdkmp.replaceAll("_", " ") : "-"}</strong></td>
+      <td>${getAreaBadge(getKdkmpArea(row.kdkmp))}</td>
       <td><strong style="color: #087da5;">${formatRupiah(row.nominal)}</strong></td>
       <td>${proof}</td>
     `;
@@ -506,7 +718,7 @@ function renderSetoranTable(rows) {
 }
 
 /* =========================================================
-   HELPER PAGINASI PRESISI
+   HELPER PAGINASI, CHARTS & SIDEBAR
 ========================================================= */
 function renderPaginationControls(containerId, totalRows, currentPage, onPageChange) {
   const container = document.getElementById(containerId);
@@ -539,13 +751,10 @@ function renderPaginationControls(containerId, totalRows, currentPage, onPageCha
   });
 }
 
-/* =========================================================
-   CHARTS & FORMATTERS
-========================================================= */
 function updateDailyChart(rows) {
   const map = {};
   rows.forEach(row => {
-    const d = row.date || 'Lainnya';
+    const d = toISODate(row.date) || 'Lainnya';
     if (!map[d]) map[d] = { close: 0, setor: 0 };
     const isClose = !String(row.status || '').toLowerCase().includes("setor");
     if (isClose) map[d].close += Number(row.nominal || 0);
@@ -587,23 +796,15 @@ function createStatusChart(operational, belum) {
 }
 
 function formatRupiah(value) { return "Rp " + Number(value || 0).toLocaleString("id-ID"); }
-function formatDate(date) {
-  if (!date) return "-";
-  const parts = String(date).split("-");
-  return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : date;
-}
 function updateLastUpdate() {
   const el = document.getElementById("lastUpdate");
   if (el) el.textContent = "Update: " + new Date().toLocaleString("id-ID");
 }
 function showLoading() {
   const tbody = document.getElementById("salesTable");
-  if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="loading">Memuat data dari Spreadsheet...</td></tr>`;
+  if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="loading">Memuat data dari Spreadsheet...</td></tr>`;
 }
 
-/* =========================================================
-   SIDEBAR NAVIGATION HANDLER
-========================================================= */
 function initSidebar() {
   const navItems = document.querySelectorAll(".nav-item");
   const sections = document.querySelectorAll(".page-section");
@@ -653,7 +854,6 @@ document.addEventListener("DOMContentLoaded", function() {
   loadDashboard();
   initSidebar();
 
-  // Auto Refresh Setiap 60 Detik (1 Menit)
   setInterval(function() {
     console.log("Auto-refreshing dashboard data...");
     loadDashboard();

@@ -15,14 +15,14 @@ let currentPageRanking = 1;
 
 /* =========================================================
    MAPPING WILAYAH KDKMP (BANDUNG BARAT VS KAB. BANDUNG)
-   (Tambahkan kata kunci nama kecamatan/desa jika ada yang spesifik)
 ========================================================= */
 const AREA_MAPPING = {
   BANDUNG_BARAT: [
     "Lembang", "Parongpong", "Cisarua", "Cikalongwetan", "Cipeundeuy",
     "Ngamprah", "Cipatat", "Padalarang", "Batujajar", "Cihampelas",
     "Cililin", "Cipongkor", "Rongga", "Sindangkerta", "Gununghalu", "Saguling",
-    "Cihanjuang", "Gadobangkong", "Cibodas", "Laksana", "Mekarsari", "Kertamulya"
+    "Cihanjuang", "Gadobangkong", "Cibodas", "Laksana", "Mekarsari", "Kertamulya",
+    "Karyawangi", "Cijenuk", "Cikahuripan", "Cipangeran", "Ciharashas", "Bongas", "Sukatani"
   ],
   KAB_BANDUNG: [
     "Nagreg", "Cicalengka", "Rancaekek", "Majalaya", "Cikancung",
@@ -30,21 +30,21 @@ const AREA_MAPPING = {
     "Pameungpeuk", "Pangalengan", "Kertasari", "Pacet", "Ciparay",
     "Baleendah", "Dayeuhkolot", "Bojongsoang", "Margahayu", "Margaasih",
     "Ciwidey", "Rancabali", "Pasirjambu", "Cimaung", "Cileunyi", "Cilengkrang", "Cimenyan",
-    "Cipeujeuh", "Citaman", "Bojongloa", "Sukamaju"
+    "Cipeujeuh", "Citaman", "Bojongloa", "Sukamaju", "Jelekong", "Andir",
+    "Pulosari", "Babakan", "Rahayu", "Cangkuang", "Mandalawangi", "Mekarjaya", "Tangsimekar"
   ]
 };
 
-// Mendeteksi Area dari nama KDKMP
 function getKdkmpArea(kdkmpName) {
   const clean = String(kdkmpName || '').toLowerCase().replace(/_/g, ' ');
-  
+
   const isKBB = AREA_MAPPING.BANDUNG_BARAT.some(key => clean.includes(key.toLowerCase()));
   if (isKBB) return "BANDUNG_BARAT";
 
   const isKabBandung = AREA_MAPPING.KAB_BANDUNG.some(key => clean.includes(key.toLowerCase()));
   if (isKabBandung) return "KAB_BANDUNG";
 
-  return "KAB_BANDUNG"; // Default fallback
+  return "KAB_BANDUNG";
 }
 
 function getAreaBadge(areaCode) {
@@ -66,14 +66,12 @@ function toISODate(dateVal) {
     const parts = str.split(delimiter);
 
     if (parts.length === 3) {
-      // Format DD-MM-YYYY atau DD/MM/YYYY -> YYYY-MM-DD
       if (parts[0].length <= 2 && parts[2].length === 4) {
         const dd = parts[0].padStart(2, '0');
         const mm = parts[1].padStart(2, '0');
         const yyyy = parts[2];
         return `${yyyy}-${mm}-${dd}`;
       }
-      // Sudah YYYY-MM-DD
       if (parts[0].length === 4 && parts[2].length <= 2) {
         return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
       }
@@ -120,18 +118,12 @@ function loadDashboard() {
     });
 }
 
-/* =========================================================
-   INITIALIZE DASHBOARD
-========================================================= */
 function initializeDashboard(data) {
   setDefaultDates();
   onAreaChange();
   updateLastUpdate();
 }
 
-/* =========================================================
-   SET DEFAULT TANGGAL (BULAN BERJALAN)
-========================================================= */
 function setDefaultDates() {
   const startDateInput = document.getElementById("startDate");
   const endDateInput = document.getElementById("endDate");
@@ -155,7 +147,6 @@ function onAreaChange() {
   if (!dashboardData) return;
   const selectedArea = document.getElementById("areaFilter")?.value || "ALL";
 
-  // Update teks label subjudul area
   const sidebarSub = document.getElementById("sidebarAreaSubtitle");
   const chartSub = document.getElementById("chartStatusSub");
   if (selectedArea === "BANDUNG_BARAT") {
@@ -169,7 +160,6 @@ function onAreaChange() {
     if (chartSub) chartSub.textContent = "Operasional Seluruh Area";
   }
 
-  // Sesuaikan dropdown KDKMP berdasarkan area terpilih
   const filteredKdkmpList = (dashboardData.kdkmpList || []).filter(name => {
     if (selectedArea === "ALL") return true;
     return getKdkmpArea(name) === selectedArea;
@@ -182,7 +172,7 @@ function onAreaChange() {
 function populateKdkmpFilter(list) {
   const select = document.getElementById("kdkmpFilter");
   if (!select) return;
-  
+
   const currentVal = select.value;
   select.innerHTML = `<option value="ALL">Semua KDKMP</option>`;
   list.forEach(name => {
@@ -210,10 +200,8 @@ function applyFilter() {
     const rowDateISO = toISODate(row.date);
     if (start && rowDateISO && rowDateISO < start) return false;
     if (end && rowDateISO && rowDateISO > end) return false;
-    
-    // Filter Area Wilayah
+
     if (area !== "ALL" && getKdkmpArea(row.kdkmp) !== area) return false;
-    
     if (kdkmp !== "ALL" && row.kdkmp !== kdkmp) return false;
 
     if (status !== "ALL") {
@@ -224,10 +212,8 @@ function applyFilter() {
     return true;
   });
 
-  // Urutkan Tanggal Terbaru ke Terlama
   filteredRows.sort((a, b) => new Date(toISODate(b.date) || 0) - new Date(toISODate(a.date) || 0));
 
-  // Reset Halaman Paginasi
   currentPageSales = 1;
   currentPageClose = 1;
   currentPageSetor = 1;
@@ -243,12 +229,11 @@ function applyFilter() {
   renderSetoranTable(filteredRows);
   renderRankingTable(filteredRows, area);
 
-  // Evaluasi Notifikasi Sistem berdasarkan Area
   checkSystemAlerts(filteredRows, area);
 }
 
 /* =========================================================
-   DETEKSI DOUBLE INPUT & KDKMP BELUM MENGISI (SESUAI AREA & TGL OPERASIONAL)
+   DETEKSI DOUBLE INPUT (PATOKAN KOLOM O) & KDKMP BELUM MENGISI
 ========================================================= */
 function checkSystemAlerts(rows, selectedArea = "ALL") {
   const alertContainer = document.getElementById("alertContainer");
@@ -256,46 +241,46 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
 
   alertContainer.innerHTML = "";
 
-  // 1. DETEKSI DOUBLE INPUT (Dalam area & filter yang aktif)
-  const inputTracker = {};
+  // 1. DETEKSI DOUBLE INPUT BERDASARKAN KOLOM O SPREADSHEET (row.flagDouble)
   const duplicates = [];
+  const seenDupKeys = new Set();
 
   rows.forEach(row => {
+    const flag = String(row.flagDouble || '').trim().toUpperCase();
+    if (!flag.includes("DOUBLE")) return;
+
     const rowDateISO = toISODate(row.date);
     if (!rowDateISO || !row.kdkmp) return;
-    
+
     const isSetor = String(row.status || '').toLowerCase().includes("setor");
     const typeKey = isSetor ? "Setor Omset" : "Close Shift";
-    const key = `${rowDateISO}_${row.kdkmp.trim().toLowerCase()}_${typeKey}`;
+    const dupKey = `${rowDateISO}_${row.kdkmp.trim().toLowerCase()}_${typeKey}`;
 
-    if (!inputTracker[key]) {
-      inputTracker[key] = 1;
-    } else {
-      inputTracker[key]++;
-      if (inputTracker[key] === 2) {
-        duplicates.push({
-          date: rowDateISO,
-          kdkmp: row.kdkmp,
-          type: typeKey
-        });
-      }
+    if (!seenDupKeys.has(dupKey)) {
+      seenDupKeys.add(dupKey);
+      duplicates.push({
+        date: rowDateISO,
+        kdkmp: row.kdkmp,
+        type: typeKey,
+        rawFlag: flag
+      });
     }
   });
 
   if (duplicates.length > 0) {
     let dupHtml = `<div style="background: #fcebea; border: 1px solid #f5c6cb; color: #721c24; padding: 14px; border-radius: 10px; font-size: 13px;">`;
-    dupHtml += `<strong><i class="fa-solid fa-triangle-exclamation"></i> Terdeteksi Pengisian Ganda (Double Input):</strong><ul style="margin: 8px 0 0 18px; padding: 0;">`;
-    
+    dupHtml += `<strong><i class="fa-solid fa-triangle-exclamation"></i> Terdeteksi Pengisian Ganda (Kolom O):</strong><ul style="margin: 8px 0 0 18px; padding: 0; max-height: 180px; overflow-y: auto;">`;
+
     duplicates.forEach(dup => {
       const badge = getAreaBadge(getKdkmpArea(dup.kdkmp));
-      dupHtml += `<li><strong>${dup.kdkmp.replaceAll("_", " ")}</strong> ${badge} mengisi <u>${dup.type}</u> lebih dari 1 kali pada tanggal <strong>${formatDate(dup.date)}</strong></li>`;
+      dupHtml += `<li><strong>${dup.kdkmp.replaceAll("_", " ")}</strong> ${badge} — <u>${dup.type}</u> (${dup.rawFlag}) pada tanggal <strong>${formatDate(dup.date)}</strong></li>`;
     });
-    
+
     dupHtml += `</ul></div>`;
     alertContainer.innerHTML += dupHtml;
   }
 
-  // 2. PETAKAN TANGGAL OPERASIONAL PERTAMA MASING-MASING KDKMP (Dari seluruh database)
+  // 2. PETAKAN TANGGAL OPERASIONAL PERTAMA MASING-MASING KDKMP
   const kdkmpFirstDateMap = {};
   (dashboardData.rows || []).forEach(row => {
     const rowDateISO = toISODate(row.date);
@@ -311,7 +296,6 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
   const currentHour = now.getHours();
   const todayStr = toISODate(now);
 
-  // Filter daftar KDKMP operasional sesuai Area Wilayah yang dipilih
   const activeKdkmp = (dashboardData.operationalKdkmp || []).filter(k => {
     if (selectedArea === "ALL") return true;
     return getKdkmpArea(k) === selectedArea;
@@ -319,7 +303,6 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
 
   if (!activeKdkmp.length) return;
 
-  // Tanggal 1 bulan ini s/d kemarin
   const datesMonthToYesterday = [];
   const yyyy = now.getFullYear();
   const mm = now.getMonth();
@@ -330,8 +313,7 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
     datesMonthToYesterday.push(toISODate(dateObj));
   }
 
-  // Gunakan seluruh rows untuk pengecekan kelengkapan input
-  const allRowsInArea = (dashboardData.rows || []).filter(r => 
+  const allRowsInArea = (dashboardData.rows || []).filter(r =>
     selectedArea === "ALL" || getKdkmpArea(r.kdkmp) === selectedArea
   );
 
@@ -401,11 +383,10 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
     let missingHtml = `<div style="background: #fff3df; border: 1px solid #ffeeba; color: #856404; padding: 14px; border-radius: 10px; font-size: 13px;">`;
     missingHtml += `<strong><i class="fa-solid fa-circle-exclamation"></i> Monitoring Keterlambatan Pengisian (${areaTitle}):</strong><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 10px;">`;
 
-    // Alert Close Shift
     if (missingCloseDetails.length > 0) {
       missingHtml += `<div style="background: rgba(255,255,255,0.75); padding: 10px; border-radius: 8px;">`;
       missingHtml += `<strong style="color: #a71d2a;"><i class="fa-solid fa-clock"></i> Belum Close Shift (Bulan Ini):</strong><ul style="margin: 6px 0 0 16px; padding: 0; max-height: 220px; overflow-y: auto;">`;
-      
+
       missingCloseDetails.forEach(item => {
         const labelHari = item.isToday ? " <strong>(Hari Ini)</strong>" : "";
         item.outlets.forEach(name => {
@@ -417,18 +398,17 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
       missingHtml += `</ul></div>`;
     }
 
-    // Alert Setor Omset
     if (missingSetorDetails.length > 0) {
       missingHtml += `<div style="background: rgba(255,255,255,0.75); padding: 10px; border-radius: 8px;">`;
       missingHtml += `<strong style="color: #a71d2a;"><i class="fa-solid fa-triangle-exclamation"></i> Belum Setor Omset (Bulan Ini):</strong><ul style="margin: 6px 0 0 16px; padding: 0; max-height: 220px; overflow-y: auto;">`;
-      
+
       missingSetorDetails.forEach(item => {
         item.outlets.forEach(name => {
           const badge = selectedArea === "ALL" ? getAreaBadge(getKdkmpArea(name)) : "";
           missingHtml += `<li><strong>${name.replaceAll("_", " ")}</strong>${badge} — Belum Setor pertanggal <u>${formatDate(item.date)}</u></li>`;
         });
       });
-      
+
       missingHtml += `</ul></div>`;
     }
 
@@ -465,10 +445,10 @@ function updateKPI(rows) {
 function updateOperationalByArea(selectedArea) {
   if (!dashboardData) return;
 
-  const allList = (dashboardData.kdkmpList || []).filter(k => 
+  const allList = (dashboardData.kdkmpList || []).filter(k =>
     selectedArea === "ALL" || getKdkmpArea(k) === selectedArea
   );
-  const opList = (dashboardData.operationalKdkmp || []).filter(k => 
+  const opList = (dashboardData.operationalKdkmp || []).filter(k =>
     selectedArea === "ALL" || getKdkmpArea(k) === selectedArea
   );
 
@@ -484,14 +464,13 @@ function updateOperationalByArea(selectedArea) {
 }
 
 /* =========================================================
-   TABEL MENU KDKMP (PER AREA + TANGGAL MULAI OPERASIONAL)
+   TABEL MENU KDKMP
 ========================================================= */
 function renderKdkmpTableByArea(selectedArea) {
   const tbody = document.getElementById("kdkmpTableBody");
   if (!tbody || !dashboardData) return;
   tbody.innerHTML = "";
 
-  // Hitung tanggal transaksi pertama per outlet
   const firstDateMap = {};
   (dashboardData.rows || []).forEach(r => {
     const iso = toISODate(r.date);
@@ -502,7 +481,7 @@ function renderKdkmpTableByArea(selectedArea) {
     }
   });
 
-  const kdkmpList = (dashboardData.kdkmpList || []).filter(k => 
+  const kdkmpList = (dashboardData.kdkmpList || []).filter(k =>
     selectedArea === "ALL" || getKdkmpArea(k) === selectedArea
   );
   const operationalList = dashboardData.operationalKdkmp || [];
@@ -573,7 +552,7 @@ function renderRankingTable(rows, selectedArea = "ALL") {
   pageRows.forEach((item, index) => {
     const rank = startIdx + index + 1;
     let rankBadge = `<strong>#${rank}</strong>`;
-    
+
     if (rank === 1) rankBadge = `<span style="color: #d4af37; font-size: 16px;"><i class="fa-solid fa-trophy"></i> #1</span>`;
     else if (rank === 2) rankBadge = `<span style="color: #a8a8a8; font-size: 15px;"><i class="fa-solid fa-trophy"></i> #2</span>`;
     else if (rank === 3) rankBadge = `<span style="color: #b08d57; font-size: 14px;"><i class="fa-solid fa-trophy"></i> #3</span>`;

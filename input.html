@@ -4,243 +4,2321 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Penyetoran KDKMP</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <title>Setor Omset & Close Shift KDKMP — Bandung Raya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f6fa;
-            color: #202124;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
         }
 
-        .form-card {
-            background: white;
-            padding: 30px;
-            border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            width: 100%;
-            max-width: 480px;
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
 
-        .form-header {
-            text-align: center;
-            margin-bottom: 25px;
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
         }
 
-        .form-header i {
-            font-size: 40px;
-            color: #7b1e2b;
-            margin-bottom: 10px;
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
         }
 
-        .form-header h2 {
-            margin: 0;
-            color: #7b1e2b;
-            font-size: 22px;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
 
-        .form-header p {
-            margin: 5px 0 0;
-            color: #666;
-            font-size: 13px;
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.92) translateY(8px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 18px;
-        }
-
-        .form-group label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #444;
-        }
-
-        .form-group input,
-        .form-group select {
-            height: 42px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 0 12px;
-            font-size: 14px;
-            outline: none;
-            background: white;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #7b1e2b;
-        }
-
-        .submit-btn {
-            width: 100%;
-            height: 45px;
-            background: #7b1e2b;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
-        }
-
-        .submit-btn:hover {
-            background: #601721;
-        }
-
-        .submit-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-            color: #777;
-            text-decoration: none;
-            font-size: 13px;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
+        .animate-pop-in {
+            animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
 </head>
 
-<body>
+<body class="min-h-screen flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900">
 
-    <div class="form-card">
-        <div class="form-header">
-            <i class="fa-solid fa-file-invoice-dollar"></i>
-            <h2>Input Transaksi KDKMP</h2>
-            <p>Form pelaporan Close Shift & Setor Omset</p>
+    <!-- Top Navigation Header -->
+    <header
+        class="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm border border-white/25 flex items-center justify-center shadow-inner shrink-0">
+                    <i class="fa-solid fa-store text-lg text-amber-300"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">KDKMP BANDUNG RAYA
+                        </h1>
+                        <span
+                            class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/20 text-amber-200 border border-amber-300/30">105
+                            GERAI</span>
+                    </div>
+                    <p class="text-xs text-emerald-100 font-medium">Sistem Pelaporan Close Shift & Setor Omset</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Status Koneksi Apps Script Pill -->
+                <button type="button" id="btnOpenConfigHeader"
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition border shadow-sm bg-white/10 hover:bg-white/20 border-white/25 text-white">
+                    <span id="statusDotHeader" class="w-2.5 h-2.5 rounded-full bg-rose-400 animate-pulse"></span>
+                    <span id="statusTextHeader">Cek Koneksi Sheets</span>
+                    <i class="fa-solid fa-gear text-emerald-200 ml-0.5"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-5 space-y-5">
+
+        <!-- Banner Peringatan / Status Koneksi Google Sheets -->
+        <div id="connectionAlertBanner"
+            class="rounded-2xl border p-4 shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-50 border-amber-300 text-amber-900">
+            <div class="flex items-start gap-3">
+                <div id="connectionBannerIcon"
+                    class="w-9 h-9 rounded-xl bg-amber-200/80 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fa-solid fa-plug-circle-exclamation text-base"></i>
+                </div>
+                <div class="text-xs sm:text-sm">
+                    <p id="connectionBannerTitle" class="font-bold text-amber-950">URL Web App Google Apps Script Belum
+                        Terpasang</p>
+                    <p id="connectionBannerDesc" class="text-amber-800 mt-0.5 leading-relaxed">
+                        Saat ini data hanya akan tersimpan di penyimpanan lokal perangkat (Browser) dan <strong>belum
+                            terkirim ke Google Sheets</strong>. Klik tombol konfigurasi untuk memasang URL Web App.
+                    </p>
+                </div>
+            </div>
+            <button type="button" id="btnOpenConfigBanner"
+                class="shrink-0 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-link"></i>
+                <span>Pasang URL Apps Script</span>
+            </button>
         </div>
 
-        <form id="salesForm" onsubmit="submitForm(event)">
-            <div class="form-group">
-                <label>Tanggal Transaksi</label>
-                <input type="date" id="tanggal" required>
+        <!-- Banner Notifikasi Sukses Persistent (Muncul setelah submit berhasil) -->
+        <div id="persistentSuccessBanner"
+            class="hidden rounded-2xl bg-emerald-600 text-white p-4 shadow-lg border border-emerald-400 animate-pop-in">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="fa-solid fa-circle-check text-xl text-amber-300"></i>
+                    </div>
+                    <div>
+                        <h3 id="bannerSuccessTitle" class="font-extrabold text-base sm:text-lg tracking-tight">Sudah
+                            Close Shift!</h3>
+                        <p id="bannerSuccessDetail" class="text-xs sm:text-sm text-emerald-50 mt-0.5 leading-relaxed">
+                        </p>
+                    </div>
+                </div>
+                <button type="button"
+                    onclick="document.getElementById('persistentSuccessBanner').classList.add('hidden')"
+                    class="text-emerald-100 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
+        </div>
 
-            <!-- OPTIONS KDKMP DIKUNCI SECARA PERMANEN DI SINI -->
-            <div class="form-group">
-                <label>KDKMP</label>
-                <select id="kdkmp" required>
-                    <option value="">-- Pilih KDKMP --</option>
-                    <option value="Citaman_Nagreg">Citaman Nagreg</option>
-                    <option value="Bojongloa_Rancaekek">Bojongloa Rancaekek</option>
-                    <option value="Sukamaju_Majalaya">Sukamaju Majalaya</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Jenis Transaksi / Status</label>
-                <select id="status" required>
-                    <option value="Close Shift">Close Shift</option>
-                    <option value="Setor Omset">Setor Omset</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Nominal (Rp)</label>
-                <input type="number" id="nominal" placeholder="Contoh: 500000" min="1" required>
-            </div>
-
-            <div class="form-group">
-                <label>Bukti Transfer / Close Shift (Wajib)</label>
-                <input type="file" id="bukti" accept="image/*">
-            </div>
-
-            <button type="submit" class="submit-btn" id="btnSubmit">
-                <i class="fa-solid fa-paper-plane"></i> Kirim Laporan
+        <!-- Navigation Tabs (Alur Kerja 2 Tahap + Sekaligus + Riwayat) -->
+        <div
+            class="bg-white rounded-2xl p-1.5 shadow-sm border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            <button type="button" data-mode="CLOSE_SHIFT"
+                class="mode-tab active flex flex-col items-center justify-center py-2.5 px-3 rounded-xl text-xs font-bold transition text-center bg-emerald-700 text-white shadow-sm">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-cash-register"></i> 1. Close Shift</span>
+                <span class="text-[10px] font-normal opacity-85 mt-0.5">Tutup Kas (Belum Setor)</span>
             </button>
-        </form>
 
-        <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard</a>
+            <button type="button" data-mode="SETOR_OMSET"
+                class="mode-tab flex flex-col items-center justify-center py-2.5 px-3 rounded-xl text-xs font-bold transition text-center text-slate-600 hover:bg-slate-100 relative">
+                <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-money-bill-transfer"></i> 2. Setor Omset
+                    <span id="pendingBadgeTab"
+                        class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-extrabold">0</span>
+                </span>
+                <span class="text-[10px] font-normal opacity-80 mt-0.5">Pelunasan Setoran Kas</span>
+            </button>
+
+            <button type="button" data-mode="SEKALIGUS"
+                class="mode-tab flex flex-col items-center justify-center py-2.5 px-3 rounded-xl text-xs font-bold transition text-center text-slate-600 hover:bg-slate-100">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-bolt"></i> Close & Setor</span>
+                <span class="text-[10px] font-normal opacity-80 mt-0.5">Sekaligus Lunas</span>
+            </button>
+
+            <button type="button" data-mode="RIWAYAT"
+                class="mode-tab flex flex-col items-center justify-center py-2.5 px-3 rounded-xl text-xs font-bold transition text-center text-slate-600 hover:bg-slate-100">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat &
+                    Antrean</span>
+                <span class="text-[10px] font-normal opacity-80 mt-0.5">Log & Sinkronisasi</span>
+            </button>
+        </div>
+
+        <!-- PANEL UTAMA: FORM PELAPORAN (Mode CLOSE_SHIFT, SETOR_OMSET, SEKALIGUS) -->
+        <div id="formContainer" class="space-y-5">
+
+            <!-- Box Daftar Pending Close Shift (Hanya muncul di Mode 2: Setor Omset) -->
+            <div id="pendingSelectorBox"
+                class="hidden bg-amber-50/90 border border-amber-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div>
+                        <h2 class="text-sm sm:text-base font-bold text-amber-950 flex items-center gap-2">
+                            <i class="fa-solid fa-hourglass-half text-amber-600"></i>
+                            Pilih Data Close Shift yang Belum Disetor
+                        </h2>
+                        <p class="text-xs text-amber-800 mt-0.5">Klik salah satu kartu di bawah untuk memuat data gerai
+                            & omset secara otomatis.</p>
+                    </div>
+                    <span id="pendingCountText"
+                        class="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-200/70 text-amber-900">0 Pending</span>
+                </div>
+                <div id="pendingCardsList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <!-- Diisi via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Form Pelaporan -->
+            <form id="kdkmpForm" class="space-y-5" novalidate>
+                <input type="hidden" id="pendingRecordId" value="">
+
+                <!-- SECTION 1: IDENTITAS GERAI KDKMP (105 Gerai Bandung Raya) -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div
+                        class="bg-slate-50 px-5 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <span
+                                class="w-7 h-7 rounded-lg bg-emerald-700 text-white text-xs font-bold flex items-center justify-center">1</span>
+                            <h2 class="text-sm sm:text-base font-bold text-slate-800">Identitas Gerai KDKMP & Petugas
+                            </h2>
+                        </div>
+                        <span class="text-[11px] font-semibold text-slate-500">Format Sheet: Desa_Kecamatan</span>
+                    </div>
+
+                    <div class="p-5 space-y-4">
+                        <!-- Quick Search KDKMP -->
+                        <div class="relative">
+                            <label for="quickSearchKdkmp" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                <i class="fa-solid fa-magnifying-glass text-emerald-600 mr-1"></i> Pencarian Cepat Gerai
+                                KDKMP (Ketik nama desa/kelurahan atau kecamatan)
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="quickSearchKdkmp" autocomplete="off"
+                                    placeholder="Contoh: Citaman, Nagreg, Cileunyi, Lembang, Antapani..."
+                                    class="w-full pl-10 pr-9 py-2.5 text-sm bg-emerald-50/50 border border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                                <i class="fa-solid fa-search text-slate-400 absolute left-3.5 top-3 text-sm"></i>
+                                <button type="button" id="btnClearQuickSearch"
+                                    class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-0.5">
+                                    <i class="fa-solid fa-circle-xmark"></i>
+                                </button>
+                            </div>
+                            <!-- Dropdown hasil pencarian cepat -->
+                            <div id="quickSearchResults"
+                                class="hidden absolute z-20 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-64 overflow-y-auto divide-y divide-slate-100">
+                            </div>
+                        </div>
+
+                        <!-- Cascading Dropdown: Kabupaten/Kota -> Kecamatan -> KDKMP -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                            <div>
+                                <label for="selectKabKota" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Kabupaten / Kota <span class="text-rose-500">*</span>
+                                </label>
+                                <select id="selectKabKota" required
+                                    class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                                    <option value="">-- Pilih Kab / Kota --</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="selectKecamatan" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Kecamatan <span class="text-rose-500">*</span>
+                                </label>
+                                <select id="selectKecamatan" required disabled
+                                    class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60 transition">
+                                    <option value="">-- Pilih Kecamatan --</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="selectKdkmp" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Gerai KDKMP (Desa_Kecamatan) <span class="text-rose-500">*</span>
+                                </label>
+                                <select id="selectKdkmp" required disabled
+                                    class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60 transition font-semibold text-emerald-900">
+                                    <option value="">-- Pilih Gerai KDKMP --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Preview Kode KDKMP Terpilih -->
+                        <div id="selectedKdkmpBadge"
+                            class="hidden flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                                <span class="text-slate-600">Kode KDKMP Sheet:</span>
+                                <strong id="previewKodeKdkmp" class="text-emerald-900 font-extrabold text-sm"></strong>
+                            </div>
+                            <span id="previewWilayahKdkmp" class="text-emerald-700 font-medium"></span>
+                        </div>
+
+                        <!-- Baris Identitas Petugas & Shift -->
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2 border-t border-slate-100">
+                            <div>
+                                <label for="tanggalTransaksi" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Tanggal Operasional <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="date" id="tanggalTransaksi" required
+                                    class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+
+                            <div>
+                                <label for="selectShift" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Shift Kasir <span class="text-rose-500">*</span>
+                                </label>
+                                <select id="selectShift" required
+                                    class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="Shift 1 (Pagi)">Shift 1 (Pagi)</option>
+                                    <option value="Shift 2 (Siang/Sore)">Shift 2 (Siang/Sore)</option>
+                                    <option value="Full Day (1 Shift)">Full Day (1 Shift)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="namaPetugas" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Nama Petugas / Kasir <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" id="namaPetugas" required placeholder="Nama lengkap petugas"
+                                    class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+
+                            <div>
+                                <label for="nomorWa" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Nomor WhatsApp <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="tel" id="nomorWa" required placeholder="081234567890"
+                                    class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <p class="text-[10px] text-slate-500 mt-1">Otomatis diformat menjadi awalan
+                                    <strong>08...</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: RINCIAN OMSET & KALKULATOR SETORAN -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div
+                        class="bg-slate-50 px-5 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <span
+                                class="w-7 h-7 rounded-lg bg-emerald-700 text-white text-xs font-bold flex items-center justify-center">2</span>
+                            <h2 class="text-sm sm:text-base font-bold text-slate-800">Rincian Omset Penjualan &
+                                Perhitungan Setor</h2>
+                        </div>
+                        <span
+                            class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                            Modal Awal Tetap di Laci Kasir
+                        </span>
+                    </div>
+
+                    <div class="p-5 space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- Modal Awal Kas -->
+                            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                                <label for="modalAwal" class="block text-xs font-bold text-slate-700 mb-1">
+                                    Modal Awal Kas (Rp)
+                                </label>
+                                <input type="text" inputmode="numeric" id="modalAwal" value="0"
+                                    class="rupiah-input w-full px-3 py-2 text-sm font-bold text-slate-800 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <p class="text-[10px] text-slate-500 mt-1.5 leading-tight">
+                                    <i class="fa-solid fa-lock text-slate-400 mr-0.5"></i> Disimpan di kas gerai
+                                    (<strong>tidak</strong> disetor).
+                                </p>
+                            </div>
+
+                            <!-- Omset Tunai -->
+                            <div class="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                                <label for="omsetTunai" class="block text-xs font-bold text-emerald-900 mb-1">
+                                    Omset Penjualan Tunai (Rp) <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" inputmode="numeric" id="omsetTunai" value="0" required
+                                    class="rupiah-input w-full px-3 py-2 text-sm font-extrabold text-emerald-900 bg-white border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <p class="text-[10px] text-emerald-700 mt-1.5 leading-tight">
+                                    Dasar wajib setor tunai ke rekening.
+                                </p>
+                            </div>
+
+                            <!-- Omset QRIS -->
+                            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                                <label for="omsetQris" class="block text-xs font-bold text-slate-700 mb-1">
+                                    Omset Non-Tunai / QRIS (Rp)
+                                </label>
+                                <input type="text" inputmode="numeric" id="omsetQris" value="0"
+                                    class="rupiah-input w-full px-3 py-2 text-sm font-bold text-slate-800 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <p class="text-[10px] text-slate-500 mt-1.5 leading-tight">
+                                    Otomatis masuk settlement QRIS.
+                                </p>
+                            </div>
+
+                            <!-- Total Omset Keseluruhan (Readonly) -->
+                            <div
+                                class="p-3.5 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 text-white flex flex-col justify-between">
+                                <div>
+                                    <span
+                                        class="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Total
+                                        Omset Shift</span>
+                                    <div id="displayTotalOmset"
+                                        class="text-lg sm:text-xl font-extrabold text-amber-300 mt-1">Rp 0</div>
+                                </div>
+                                <div
+                                    class="text-[10px] text-slate-400 mt-2 pt-2 border-t border-slate-700 flex justify-between">
+                                    <span>Tunai + QRIS</span>
+                                    <span id="displayFisikLaci">Fisik Laci: Rp 0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kotak Ringkasan Wajib Setor & Input Nominal Setor -->
+                        <div
+                            class="rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 p-4 sm:p-5">
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                                <div class="md:col-span-5 space-y-1">
+                                    <span
+                                        class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 uppercase tracking-wide">
+                                        <i class="fa-solid fa-calculator"></i> Wajib Setor Tunai
+                                    </span>
+                                    <div id="displayWajibSetor"
+                                        class="text-2xl sm:text-3xl font-extrabold text-emerald-900">Rp 0</div>
+                                    <p class="text-[11px] text-emerald-700">
+                                        Rumus: <strong>100% Omset Tunai</strong> (Modal Awal tetap di gerai).
+                                    </p>
+                                </div>
+
+                                <div id="nominalSetorWrapper"
+                                    class="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label for="nominalSetor" class="block text-xs font-bold text-slate-800">
+                                                Nominal Disetor (Rp) <span id="starNominalSetor"
+                                                    class="text-rose-500">*</span>
+                                            </label>
+                                            <button type="button" id="btnSetorPas"
+                                                class="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 underline">
+                                                Isi Sesuai Wajib
+                                            </button>
+                                        </div>
+                                        <input type="text" inputmode="numeric" id="nominalSetor" value="0"
+                                            class="rupiah-input w-full px-3.5 py-2.5 text-sm font-extrabold text-slate-900 bg-white border border-emerald-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    </div>
+
+                                    <div>
+                                        <label for="metodeSetor" class="block text-xs font-bold text-slate-800 mb-1">
+                                            Metode / Tujuan Setor
+                                        </label>
+                                        <select id="metodeSetor"
+                                            class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                            <option value="Belum Setor (Close Shift)">Belum Setor (Close Shift)</option>
+                                            <option value="Transfer Bank BRI">Transfer Bank BRI</option>
+                                            <option value="Transfer Bank BNI">Transfer Bank BNI</option>
+                                            <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
+                                            <option value="Transfer Bank BJB">Transfer Bank BJB</option>
+                                            <option value="Setor Tunai Teller / Agen">Setor Tunai Teller / Agen</option>
+                                            <option value="Diserahkan ke Korlap">Diserahkan ke Korlap</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Indikator Selisih -->
+                                    <div
+                                        class="sm:col-span-2 flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
+                                        <span class="text-slate-600 font-medium">Status Selisih Setoran:</span>
+                                        <span id="badgeSelisih"
+                                            class="px-2.5 py-1 rounded-lg font-bold bg-slate-200 text-slate-700">
+                                            Rp 0 (Menunggu Input)
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Catatan / Keterangan Tambahan -->
+                        <div>
+                            <label for="catatanTambahan" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Keterangan / Catatan Shift (Opsional)
+                            </label>
+                            <textarea id="catatanTambahan" rows="2"
+                                placeholder="Contoh: Uang pecah kecil Rp 50.000 disimpan untuk kembalian besok pagi, atau nomor referensi transfer..."
+                                class="w-full px-3.5 py-2 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: DOKUMENTASI FOTO (2 UPLOAD TERPISAH + KOMPRESI OTOMATIS) -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div
+                        class="bg-slate-50 px-5 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <span
+                                class="w-7 h-7 rounded-lg bg-emerald-700 text-white text-xs font-bold flex items-center justify-center">3</span>
+                            <h2 class="text-sm sm:text-base font-bold text-slate-800">Upload Bukti Foto (Kompresi
+                                Otomatis)</h2>
+                        </div>
+                        <span class="text-[11px] font-medium text-slate-500">Otomatis dikompres &lt; 250KB agar cepat
+                            masuk Google Drive</span>
+                    </div>
+
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Upload 1: Bukti Close Shift -->
+                        <div id="boxFotoCloseShift"
+                            class="rounded-2xl border-2 border-dashed border-slate-300 hover:border-emerald-400 transition p-4 bg-slate-50/60 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-receipt text-emerald-600"></i>
+                                        1. Foto Bukti Close Shift / Struk POS
+                                    </span>
+                                    <span id="badgeWajibFotoClose"
+                                        class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">Wajib</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mb-3">Foto struk tutup kasir / rekap POS / fisik
+                                    uang tunai di laci.</p>
+
+                                <label for="inputFotoCloseShift"
+                                    class="cursor-pointer flex flex-col items-center justify-center py-4 px-3 rounded-xl bg-white border border-slate-200 hover:bg-emerald-50/50 transition text-center">
+                                    <i class="fa-solid fa-camera text-2xl text-emerald-600 mb-1.5"></i>
+                                    <span class="text-xs font-bold text-slate-700">Pilih / Ambil Foto Close Shift</span>
+                                    <span class="text-[10px] text-slate-400 mt-0.5">JPG, PNG, WEBP (Kamera /
+                                        Galeri)</span>
+                                </label>
+                                <input type="file" id="inputFotoCloseShift" accept="image/*" class="hidden">
+                            </div>
+
+                            <!-- Preview Foto 1 -->
+                            <div id="previewContainerClose" class="hidden mt-3 pt-3 border-t border-slate-200">
+                                <div
+                                    class="relative rounded-xl overflow-hidden border border-slate-300 bg-slate-900 aspect-video flex items-center justify-center">
+                                    <img id="imgPreviewClose" src="" alt="Preview Close Shift"
+                                        class="max-h-48 w-auto object-contain">
+                                    <button type="button" id="btnRemoveFotoClose"
+                                        class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-rose-600 text-white text-xs flex items-center justify-center shadow hover:bg-rose-700">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                                <p id="infoFotoClose"
+                                    class="text-[11px] text-emerald-700 font-semibold mt-1.5 flex items-center gap-1">
+                                    <i class="fa-solid fa-check-circle"></i> <span>Siap dikirim</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Upload 2: Bukti Setor Omset / Transfer -->
+                        <div id="boxFotoSetor"
+                            class="rounded-2xl border-2 border-dashed border-slate-300 hover:border-emerald-400 transition p-4 bg-slate-50/60 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-file-invoice-dollar text-teal-600"></i>
+                                        2. Foto Bukti Setor Omset / Transfer
+                                    </span>
+                                    <span id="badgeWajibFotoSetor"
+                                        class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600">Opsional
+                                        saat Close</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mb-3">Foto resi transfer m-banking, struk ATM/EDC,
+                                    atau tanda terima setor tunai.</p>
+
+                                <label for="inputFotoSetor"
+                                    class="cursor-pointer flex flex-col items-center justify-center py-4 px-3 rounded-xl bg-white border border-slate-200 hover:bg-teal-50/50 transition text-center">
+                                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-teal-600 mb-1.5"></i>
+                                    <span class="text-xs font-bold text-slate-700">Pilih / Ambil Foto Bukti Setor</span>
+                                    <span class="text-[10px] text-slate-400 mt-0.5">JPG, PNG, WEBP (Kamera /
+                                        Galeri)</span>
+                                </label>
+                                <input type="file" id="inputFotoSetor" accept="image/*" class="hidden">
+                            </div>
+
+                            <!-- Preview Foto 2 -->
+                            <div id="previewContainerSetor" class="hidden mt-3 pt-3 border-t border-slate-200">
+                                <div
+                                    class="relative rounded-xl overflow-hidden border border-slate-300 bg-slate-900 aspect-video flex items-center justify-center">
+                                    <img id="imgPreviewSetor" src="" alt="Preview Setor Omset"
+                                        class="max-h-48 w-auto object-contain">
+                                    <button type="button" id="btnRemoveFotoSetor"
+                                        class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-rose-600 text-white text-xs flex items-center justify-center shadow hover:bg-rose-700">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                                <p id="infoFotoSetor"
+                                    class="text-[11px] text-teal-700 font-semibold mt-1.5 flex items-center gap-1">
+                                    <i class="fa-solid fa-check-circle"></i> <span>Siap dikirim</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4: PERNYATAAN & TOMBOL SUBMIT -->
+                <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+                    <label
+                        class="flex items-start gap-3 cursor-pointer select-none p-3 rounded-xl bg-slate-50 border border-slate-200 hover:bg-emerald-50/40 transition">
+                        <input type="checkbox" id="checkPernyataan" required
+                            class="mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                        <span class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                            <strong class="text-slate-900">Saya bersedia</strong> bertanggung jawab penuh atas kebenaran
+                            data perhitungan omset, modal kas gerai, serta keaslian bukti foto yang dilaporkan ke sistem
+                            KDKMP Bandung Raya.
+                        </span>
+                    </label>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+                        <button type="button" id="btnResetForm"
+                            class="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Reset Form</span>
+                        </button>
+
+                        <button type="submit" id="btnSubmitLaporan"
+                            class="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white text-sm sm:text-base font-extrabold shadow-lg shadow-emerald-700/25 transition flex items-center justify-center gap-2.5">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span id="btnSubmitLabel">Simpan & Kirim Laporan Close Shift</span>
+                        </button>
+                    </div>
+                </section>
+            </form>
+        </div>
+
+        <!-- PANEL RIWAYAT & ANTREAN SINKRONISASI (Mode RIWAYAT) -->
+        <div id="riwayatContainer" class="hidden space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-emerald-600"></i>
+                            Riwayat Laporan Lokal & Status Pengiriman Sheets
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Menampilkan laporan yang dikirim dari perangkat ini
+                            beserta status masuk ke Google Sheets.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="btnSyncAllUnsynced"
+                            class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Kirim Ulang yang Belum Terkirim</span>
+                        </button>
+                        <button type="button" id="btnClearHistory"
+                            class="px-3 py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition">
+                            Hapus Log Lokal
+                        </button>
+                    </div>
+                </div>
+
+                <div id="historyTableWrapper" class="mt-4 overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 border-b border-slate-200">
+                                <th class="py-2.5 px-3 font-bold">Waktu & Tanggal</th>
+                                <th class="py-2.5 px-3 font-bold">Gerai KDKMP</th>
+                                <th class="py-2.5 px-3 font-bold">Tahap / Status</th>
+                                <th class="py-2.5 px-3 font-bold text-right">Omset Tunai</th>
+                                <th class="py-2.5 px-3 font-bold text-right">Disetor</th>
+                                <th class="py-2.5 px-3 font-bold text-center">Status Sheets</th>
+                                <th class="py-2.5 px-3 font-bold text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody" class="divide-y divide-slate-100">
+                            <!-- Diisi via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL KONFIGURASI GOOGLE APPS SCRIPT & CODE.GS -->
+    <div id="configModal"
+        class="hidden fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div
+            class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden my-auto animate-pop-in">
+            <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300">
+                        <i class="fa-solid fa-table"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-extrabold">Koneksi Google Sheets (Form Responses 1)</h3>
+                        <p class="text-[11px] text-slate-300">Konfigurasi Web App URL & Kode Google Apps Script
+                            Anti-CORS</p>
+                    </div>
+                </div>
+                <button type="button" id="btnCloseConfigModal" class="text-slate-400 hover:text-white p-1.5 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-4 max-h-[82vh] overflow-y-auto text-xs sm:text-sm">
+                <!-- Input URL Web App -->
+                <div class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-3">
+                    <label for="inputAppsScriptUrl" class="block text-xs font-extrabold text-emerald-950">
+                        URL Web App Google Apps Script (<code
+                            class="bg-white px-1.5 py-0.5 rounded border border-emerald-200">https://script.google.com/macros/s/.../exec</code>)
+                    </label>
+                    <input type="url" id="inputAppsScriptUrl"
+                        placeholder="https://script.google.com/macros/s/AKfycbx.../exec"
+                        class="w-full px-3.5 py-2.5 text-xs sm:text-sm font-mono bg-white border border-emerald-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600">
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" id="btnSaveAppsScriptUrl"
+                            class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Simpan URL</span>
+                        </button>
+
+                        <button type="button" id="btnTestConnection"
+                            class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-vial-circle-check"></i>
+                            <span>Test Koneksi & Kirim Baris Uji</span>
+                        </button>
+                    </div>
+
+                    <!-- Hasil Test Koneksi -->
+                    <div id="testConnectionResult" class="hidden p-3 rounded-xl text-xs leading-relaxed border"></div>
+                </div>
+
+                <!-- Panduan Deployment Penting -->
+                <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1.5">
+                    <p class="font-extrabold flex items-center gap-1.5">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                        Wajib Diperhatikan Saat Deploy di Google Apps Script:
+                    </p>
+                    <ol class="list-decimal list-inside space-y-1 text-amber-800">
+                        <li>Klik <strong>Deploy &gt; New deployment</strong> (atau <strong>Manage deployments &gt; Edit
+                                &gt; Version: New version</strong> setiap kali mengubah kode).</li>
+                        <li>Pada bagian <strong>Execute as</strong> pilih: <strong>Me (email Anda)</strong>.</li>
+                        <li>Pada bagian <strong>Who has access</strong> WAJIB pilih: <strong>Anyone (Siapa
+                                saja)</strong> agar tidak diblokir login Google / CORS.</li>
+                        <li>Pastikan tab sheet tujuan bernama <strong>Form Responses 1</strong> (kolom A sampai O).</li>
+                    </ol>
+                </div>
+
+                <!-- Kode Code.gs Siap Salin -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold text-slate-800">
+                            <i class="fa-solid fa-code text-emerald-600 mr-1"></i> Kode <code>Code.gs</code> Terbaru
+                            (Support JSON text/plain, Form Payload, Drive Upload & Kolom A–O)
+                        </span>
+                        <button type="button" id="btnCopyCodeGs"
+                            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>Salin Code.gs</span>
+                        </button>
+                    </div>
+                    <pre id="codeGsBlock"
+                        class="bg-slate-900 text-emerald-300 p-3.5 rounded-xl text-[11px] font-mono overflow-x-auto max-h-64 leading-relaxed select-all"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POP-UP KONFIRMASI BERHASIL / NOTIFIKASI -->
+    <div id="statusModal"
+        class="hidden fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+            class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 text-center space-y-4 animate-pop-in">
+            <div id="statusModalIconWrapper"
+                class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-3xl shadow-inner">
+                <i id="statusModalIcon" class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <h3 id="statusModalTitle" class="text-xl font-extrabold text-slate-900">Sudah Close Shift!</h3>
+                <p id="statusModalMessage" class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed"></p>
+            </div>
+            <div id="statusModalMeta"
+                class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs space-y-1 text-slate-700">
+            </div>
+            <button type="button" id="btnCloseStatusModal"
+                class="w-full py-3 px-5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-extrabold shadow transition">
+                Selesai & Tutup
+            </button>
+        </div>
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay"
+        class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl space-y-3">
+            <div class="w-12 h-12 border-4 border-emerald-200 border-t-emerald-700 rounded-full animate-spin mx-auto">
+            </div>
+            <h4 id="loadingTitle" class="text-sm font-extrabold text-slate-800">Mengirim ke Google Sheets...</h4>
+            <p id="loadingSubtitle" class="text-xs text-slate-500">Mengunggah data & bukti foto ke Form Responses 1</p>
+        </div>
     </div>
 
     <script>
-        // GANTI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
-        const API_URL = "https://script.google.com/macros/s/AKfycbytQnTdl9gEqBUX3dfXdwZoEoES54ntEYIrYQP4s1I9RHYjcmkse9IzUKRj-zW_kBRd1Q/exec";
+        /**
+         * ============================================================================
+         * 1. DATABASE LENGKAP 105 KDKMP BANDUNG RAYA (Bandung_Deris.xlsx)
+         * Format KDKMP sesuai sheet Form Responses 1: Desa_Kecamatan
+         * ============================================================================
+         */
+        const KDKMP_DATABASE = [
+            // KABUPATEN BANDUNG (64 Gerai)
+            { kab: "Kabupaten Bandung", kec: "Arjasari", desa: "Ancolmekar", kode: "Ancolmekar_Arjasari" },
+            { kab: "Kabupaten Bandung", kec: "Arjasari", desa: "Arjasari", kode: "Arjasari_Arjasari" },
+            { kab: "Kabupaten Bandung", kec: "Arjasari", desa: "Baros", kode: "Baros_Arjasari" },
+            { kab: "Kabupaten Bandung", kec: "Arjasari", desa: "Lebakwangi", kode: "Lebakwangi_Arjasari" },
+            { kab: "Kabupaten Bandung", kec: "Baleendah", desa: "Andir", kode: "Andir_Baleendah" },
+            { kab: "Kabupaten Bandung", kec: "Baleendah", desa: "Baleendah", kode: "Baleendah_Baleendah" },
+            { kab: "Kabupaten Bandung", kec: "Baleendah", desa: "Bojongmalaka", kode: "Bojongmalaka_Baleendah" },
+            { kab: "Kabupaten Bandung", kec: "Baleendah", desa: "Jelekong", kode: "Jelekong_Baleendah" },
+            { kab: "Kabupaten Bandung", kec: "Baleendah", desa: "Manggahang", kode: "Manggahang_Baleendah" },
+            { kab: "Kabupaten Bandung", kec: "Baleendah", desa: "Rancamanyar", kode: "Rancamanyar_Baleendah" },
+            { kab: "Kabupaten Bandung", kec: "Banjaran", desa: "Banjaran", kode: "Banjaran_Banjaran" },
+            { kab: "Kabupaten Bandung", kec: "Banjaran", desa: "Ciherang", kode: "Ciherang_Banjaran" },
+            { kab: "Kabupaten Bandung", kec: "Banjaran", desa: "Kamasan", kode: "Kamasan_Banjaran" },
+            { kab: "Kabupaten Bandung", kec: "Bojongsoang", desa: "Bojongsari", kode: "Bojongsari_Bojongsoang" },
+            { kab: "Kabupaten Bandung", kec: "Bojongsoang", desa: "Bojongsoang", kode: "Bojongsoang_Bojongsoang" },
+            { kab: "Kabupaten Bandung", kec: "Bojongsoang", desa: "Buahbatu", kode: "Buahbatu_Bojongsoang" },
+            { kab: "Kabupaten Bandung", kec: "Bojongsoang", desa: "Cipagalo", kode: "Cipagalo_Bojongsoang" },
+            { kab: "Kabupaten Bandung", kec: "Bojongsoang", desa: "Lengkong", kode: "Lengkong_Bojongsoang" },
+            { kab: "Kabupaten Bandung", kec: "Cangkuang", desa: "Bandasari", kode: "Bandasari_Cangkuang" },
+            { kab: "Kabupaten Bandung", kec: "Cangkuang", desa: "Cangkuang", kode: "Cangkuang_Cangkuang" },
+            { kab: "Kabupaten Bandung", kec: "Cangkuang", desa: "Nagrak", kode: "Nagrak_Cangkuang" },
+            { kab: "Kabupaten Bandung", kec: "Cicalengka", desa: "Babakanpeuteuy", kode: "Babakanpeuteuy_Cicalengka" },
+            { kab: "Kabupaten Bandung", kec: "Cicalengka", desa: "Cicalengka Kulon", kode: "Cicalengka Kulon_Cicalengka" },
+            { kab: "Kabupaten Bandung", kec: "Cicalengka", desa: "Cicalengka Wetan", kode: "Cicalengka Wetan_Cicalengka" },
+            { kab: "Kabupaten Bandung", kec: "Cicalengka", desa: "Cikuya", kode: "Cikuya_Cicalengka" },
+            { kab: "Kabupaten Bandung", kec: "Cicalengka", desa: "Dampit", kode: "Dampit_Cicalengka" },
+            { kab: "Kabupaten Bandung", kec: "Cicalengka", desa: "Panenjoan", kode: "Panenjoan_Cicalengka" },
+            { kab: "Kabupaten Bandung", kec: "Cikancung", desa: "Cikasungka", kode: "Cikasungka_Cikancung" },
+            { kab: "Kabupaten Bandung", kec: "Cikancung", desa: "Ciluluk", kode: "Ciluluk_Cikancung" },
+            { kab: "Kabupaten Bandung", kec: "Cikancung", desa: "Hegarmanah", kode: "Hegarmanah_Cikancung" },
+            { kab: "Kabupaten Bandung", kec: "Cilengkrang", desa: "Cipanjalu", kode: "Cipanjalu_Cilengkrang" },
+            { kab: "Kabupaten Bandung", kec: "Cilengkrang", desa: "Jatiendah", kode: "Jatiendah_Cilengkrang" },
+            { kab: "Kabupaten Bandung", kec: "Cileunyi", desa: "Cibiru Hilir", kode: "Cibiru Hilir_Cileunyi" },
+            { kab: "Kabupaten Bandung", kec: "Cileunyi", desa: "Cibiru Wetan", kode: "Cibiru Wetan_Cileunyi" },
+            { kab: "Kabupaten Bandung", kec: "Cileunyi", desa: "Cileunyi Kulon", kode: "Cileunyi Kulon_Cileunyi" },
+            { kab: "Kabupaten Bandung", kec: "Cileunyi", desa: "Cileunyi Wetan", kode: "Cileunyi Wetan_Cileunyi" },
+            { kab: "Kabupaten Bandung", kec: "Cileunyi", desa: "Cimekar", kode: "Cimekar_Cileunyi" },
+            { kab: "Kabupaten Bandung", kec: "Cileunyi", desa: "Cinunuk", kode: "Cinunuk_Cileunyi" },
+            { kab: "Kabupaten Bandung", kec: "Cimaung", desa: "Cimaung", kode: "Cimaung_Cimaung" },
+            { kab: "Kabupaten Bandung", kec: "Cimaung", desa: "Jagabaya", kode: "Jagabaya_Cimaung" },
+            { kab: "Kabupaten Bandung", kec: "Cimenyan", desa: "Cibeunying", kode: "Cibeunying_Cimenyan" },
+            { kab: "Kabupaten Bandung", kec: "Cimenyan", desa: "Ciburial", kode: "Ciburial_Cimenyan" },
+            { kab: "Kabupaten Bandung", kec: "Cimenyan", desa: "Padasuka", kode: "Padasuka_Cimenyan" },
+            { kab: "Kabupaten Bandung", kec: "Ciparay", desa: "Bumiwangi", kode: "Bumiwangi_Ciparay" },
+            { kab: "Kabupaten Bandung", kec: "Ciparay", desa: "Ciparay", kode: "Ciparay_Ciparay" },
+            { kab: "Kabupaten Bandung", kec: "Ciparay", desa: "Pakutandang", kode: "Pakutandang_Ciparay" },
+            { kab: "Kabupaten Bandung", kec: "Dayeuhkolot", desa: "Cangkuang Kulon", kode: "Cangkuang Kulon_Dayeuhkolot" },
+            { kab: "Kabupaten Bandung", kec: "Dayeuhkolot", desa: "Cangkuang Wetan", kode: "Cangkuang Wetan_Dayeuhkolot" },
+            { kab: "Kabupaten Bandung", kec: "Dayeuhkolot", desa: "Citeureup", kode: "Citeureup_Dayeuhkolot" },
+            { kab: "Kabupaten Bandung", kec: "Dayeuhkolot", desa: "Dayeuhkolot", kode: "Dayeuhkolot_Dayeuhkolot" },
+            { kab: "Kabupaten Bandung", kec: "Dayeuhkolot", desa: "Sukapura", kode: "Sukapura_Dayeuhkolot" },
+            { kab: "Kabupaten Bandung", kec: "Katapang", desa: "Banyusari", kode: "Banyusari_Katapang" },
+            { kab: "Kabupaten Bandung", kec: "Katapang", desa: "Gandasari", kode: "Gandasari_Katapang" },
+            { kab: "Kabupaten Bandung", kec: "Katapang", desa: "Sangkanhurip", kode: "Sangkanhurip_Katapang" },
+            { kab: "Kabupaten Bandung", kec: "Majalaya", desa: "Majakerta", kode: "Majakerta_Majalaya" },
+            { kab: "Kabupaten Bandung", kec: "Majalaya", desa: "Majalaya", kode: "Majalaya_Majalaya" },
+            { kab: "Kabupaten Bandung", kec: "Majalaya", desa: "Solokanjeruk", kode: "Solokanjeruk_Majalaya" },
+            { kab: "Kabupaten Bandung", kec: "Margaasih", desa: "Lagadar", kode: "Lagadar_Margaasih" },
+            { kab: "Kabupaten Bandung", kec: "Margaasih", desa: "Margaasih", kode: "Margaasih_Margaasih" },
+            { kab: "Kabupaten Bandung", kec: "Margahayu", desa: "Margahayu Selatan", kode: "Margahayu Selatan_Margahayu" },
+            { kab: "Kabupaten Bandung", kec: "Margahayu", desa: "Sayati", kode: "Sayati_Margahayu" },
+            { kab: "Kabupaten Bandung", kec: "Nagreg", desa: "Bojong", kode: "Bojong_Nagreg" },
+            { kab: "Kabupaten Bandung", kec: "Nagreg", desa: "Citaman", kode: "Citaman_Nagreg" },
+            { kab: "Kabupaten Bandung", kec: "Nagreg", desa: "Nagreg", kode: "Nagreg_Nagreg" },
 
-        // Otomatis isi tanggal hari ini
-        document.getElementById("tanggal").valueAsDate = new Date();
+            // KABUPATEN BANDUNG BARAT (23 Gerai)
+            { kab: "Kabupaten Bandung Barat", kec: "Batujajar", desa: "Batujajar Barat", kode: "Batujajar Barat_Batujajar" },
+            { kab: "Kabupaten Bandung Barat", kec: "Batujajar", desa: "Batujajar Timur", kode: "Batujajar Timur_Batujajar" },
+            { kab: "Kabupaten Bandung Barat", kec: "Batujajar", desa: "Galanggang", kode: "Galanggang_Batujajar" },
+            { kab: "Kabupaten Bandung Barat", kec: "Cihampelas", desa: "Cihampelas", kode: "Cihampelas_Cihampelas" },
+            { kab: "Kabupaten Bandung Barat", kec: "Cihampelas", desa: "Citapen", kode: "Citapen_Cihampelas" },
+            { kab: "Kabupaten Bandung Barat", kec: "Cikalongwetan", desa: "Cikalong", kode: "Cikalong_Cikalongwetan" },
+            { kab: "Kabupaten Bandung Barat", kec: "Cikalongwetan", desa: "Rende", kode: "Rende_Cikalongwetan" },
+            { kab: "Kabupaten Bandung Barat", kec: "Cililin", desa: "Budiharja", kode: "Budiharja_Cililin" },
+            { kab: "Kabupaten Bandung Barat", kec: "Cililin", desa: "Cililin", kode: "Cililin_Cililin" },
+            { kab: "Kabupaten Bandung Barat", kec: "Cipatat", desa: "Cipatat", kode: "Cipatat_Cipatat" },
+            { kab: "Kabupaten Bandung Barat", kec: "Cipatat", desa: "Rajamandala Kulon", kode: "Rajamandala Kulon_Cipatat" },
+            { kab: "Kabupaten Bandung Barat", kec: "Cisarua", desa: "Jambudipa", kode: "Jambudipa_Cisarua" },
+            { kab: "Kabupaten Bandung Barat", kec: "Cisarua", desa: "Padaasih", kode: "Padaasih_Cisarua" },
+            { kab: "Kabupaten Bandung Barat", kec: "Lembang", desa: "Cibogo", kode: "Cibogo_Lembang" },
+            { kab: "Kabupaten Bandung Barat", kec: "Lembang", desa: "Gudangkahuripan", kode: "Gudangkahuripan_Lembang" },
+            { kab: "Kabupaten Bandung Barat", kec: "Lembang", desa: "Jayagiri", kode: "Jayagiri_Lembang" },
+            { kab: "Kabupaten Bandung Barat", kec: "Lembang", desa: "Kayuambon", kode: "Kayuambon_Lembang" },
+            { kab: "Kabupaten Bandung Barat", kec: "Lembang", desa: "Lembang", kode: "Lembang_Lembang" },
+            { kab: "Kabupaten Bandung Barat", kec: "Ngamprah", desa: "Cimareme", kode: "Cimareme_Ngamprah" },
+            { kab: "Kabupaten Bandung Barat", kec: "Ngamprah", desa: "Gadobangkong", kode: "Gadobangkong_Ngamprah" },
+            { kab: "Kabupaten Bandung Barat", kec: "Padalarang", desa: "Ciburuy", kode: "Ciburuy_Padalarang" },
+            { kab: "Kabupaten Bandung Barat", kec: "Padalarang", desa: "Kertajaya", kode: "Kertajaya_Padalarang" },
+            { kab: "Kabupaten Bandung Barat", kec: "Padalarang", desa: "Padalarang", kode: "Padalarang_Padalarang" },
 
-        // Submit Form Handler
-        function submitForm(event) {
-            event.preventDefault();
+            // KOTA BANDUNG (18 Gerai)
+            { kab: "Kota Bandung", kec: "Andir", desa: "Ciroyom", kode: "Ciroyom_Andir" },
+            { kab: "Kota Bandung", kec: "Antapani", desa: "Antapani Tengah", kode: "Antapani Tengah_Antapani" },
+            { kab: "Kota Bandung", kec: "Arcamanik", desa: "Cisaranten Bina Harapan", kode: "Cisaranten Bina Harapan_Arcamanik" },
+            { kab: "Kota Bandung", kec: "Astanaanyar", desa: "Cibadak", kode: "Cibadak_Astanaanyar" },
+            { kab: "Kota Bandung", kec: "Babakan Ciparay", desa: "Babakan Ciparay", kode: "Babakan Ciparay_Babakan Ciparay" },
+            { kab: "Kota Bandung", kec: "Bandung Kulon", desa: "Cijerah", kode: "Cijerah_Bandung Kulon" },
+            { kab: "Kota Bandung", kec: "Batununggal", desa: "Binong", kode: "Binong_Batununggal" },
+            { kab: "Kota Bandung", kec: "Bojongloa Kaler", desa: "Kopo", kode: "Kopo_Bojongloa Kaler" },
+            { kab: "Kota Bandung", kec: "Buahbatu", desa: "Margasari", kode: "Margasari_Buahbatu" },
+            { kab: "Kota Bandung", kec: "Cibeunying Kidul", desa: "Cicadas", kode: "Cicadas_Cibeunying Kidul" },
+            { kab: "Kota Bandung", kec: "Cibiru", desa: "Cipadung", kode: "Cipadung_Cibiru" },
+            { kab: "Kota Bandung", kec: "Cicendo", desa: "Arjuna", kode: "Arjuna_Cicendo" },
+            { kab: "Kota Bandung", kec: "Coblong", desa: "Dago", kode: "Dago_Coblong" },
+            { kab: "Kota Bandung", kec: "Gedebage", desa: "Rancabolang", kode: "Rancabolang_Gedebage" },
+            { kab: "Kota Bandung", kec: "Kiaracondong", desa: "Babakansari", kode: "Babakansari_Kiaracondong" },
+            { kab: "Kota Bandung", kec: "Lengkong", desa: "Turangga", kode: "Turangga_Lengkong" },
+            { kab: "Kota Bandung", kec: "Rancasari", desa: "Manjahlega", kode: "Manjahlega_Rancasari" },
+            { kab: "Kota Bandung", kec: "Ujungberung", desa: "Cigending", kode: "Cigending_Ujungberung" }
+        ];
 
-            const btn = document.getElementById("btnSubmit");
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-            btn.disabled = true;
+        /**
+         * ============================================================================
+         * 2. KODE GOOGLE APPS SCRIPT (Code.gs) UNTUK MODAL PENGATURAN
+         * ============================================================================
+         */
+        const CODE_GS_TEMPLATE = `/**
+ * Google Apps Script Web App — Setor Omset & Close Shift KDKMP Bandung Raya
+ * Target Sheet: "Form Responses 1" (Kolom A - O)
+ * Deploy: Execute as "Me", Who has access: "Anyone"
+ */
+const TARGET_SHEET_NAMES = ['Form Responses 1', 'Form Responses'];
+const DRIVE_FOLDER_NAME = 'Bukti_Omset_CloseShift_KDKMP';
 
-            const fileInput = document.getElementById("bukti");
-            const file = fileInput.files[0];
+function doGet(e) {
+  return createJsonResponse({
+    success: true,
+    status: 'ONLINE',
+    message: 'Web App KDKMP Bandung Raya aktif dan siap menerima data POST.'
+  });
+}
 
-            const payload = {
-                tanggal: document.getElementById("tanggal").value,
-                kdkmp: document.getElementById("kdkmp").value,
-                status: document.getElementById("status").value,
-                nominal: document.getElementById("nominal").value,
-                fileData: null,
-                fileName: null
-            };
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.tryLock(25000);
 
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    payload.fileData = e.target.result;
-                    payload.fileName = file.name;
-                    sendData(payload);
-                };
-                reader.readAsDataURL(file);
+  try {
+    let rawBody = '';
+    if (e && e.postData && e.postData.contents) {
+      rawBody = e.postData.contents;
+    } else if (e && e.parameter && e.parameter.payload) {
+      rawBody = e.parameter.payload;
+    }
+
+    if (!rawBody) {
+      return createJsonResponse({
+        success: false,
+        error: 'Payload kosong diterima oleh Apps Script.'
+      });
+    }
+
+    const data = JSON.parse(rawBody);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = findTargetSheet(ss);
+
+    // Handle permintaan Test Koneksi
+    if (data.action === 'TEST_CONNECTION') {
+      const testRow = [
+        new Date(),
+        'TEST_KONEKSI_OK',
+        'Sistem Admin',
+        '080000000000',
+        Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyyy-MM-dd'),
+        'Test Shift',
+        0,
+        0,
+        0,
+        0,
+        0,
+        'TEST KONEKSI',
+        '-',
+        '-',
+        'Saya bersedia (Baris Uji Koneksi)'
+      ];
+      sheet.appendRow(testRow);
+      return createJsonResponse({
+        success: true,
+        message: 'Koneksi berhasil! Baris uji telah ditambahkan ke "' + sheet.getName() + '".',
+        sheetName: sheet.getName(),
+        rowNumber: sheet.getLastRow()
+      });
+    }
+
+    // Upload foto ke Google Drive jika ada base64
+    let urlFotoClose = data.fotoCloseShiftUrl || '';
+    let urlFotoSetor = data.fotoSetorOmsetUrl || '';
+
+    if (data.fotoCloseShiftBase64 && data.fotoCloseShiftBase64.indexOf('base64,') !== -1) {
+      urlFotoClose = saveBase64ToDrive(
+        data.fotoCloseShiftBase64,
+        'CLOSE_' + (data.kdkmp || 'KDKMP') + '_' + (data.tanggal || '') + '.jpg'
+      );
+    }
+
+    if (data.fotoSetorOmsetBase64 && data.fotoSetorOmsetBase64.indexOf('base64,') !== -1) {
+      urlFotoSetor = saveBase64ToDrive(
+        data.fotoSetorOmsetBase64,
+        'SETOR_' + (data.kdkmp || 'KDKMP') + '_' + (data.tanggal || '') + '.jpg'
+      );
+    }
+
+    // Susun baris kolom A - O sesuai Form Responses 1
+    // A: Timestamp
+    // B: Gerai KDKMP (Desa_Kecamatan)
+    // C: Nama Petugas
+    // D: Nomor WA (08...)
+    // E: Tanggal Operasional
+    // F: Shift
+    // G: Modal Awal Kas
+    // H: Omset Tunai
+    // I: Omset QRIS
+    // J: Total Omset
+    // K: Nominal Setor Tunai
+    // L: Status Laporan (CLOSE SHIFT / SETOR OMSET / LUNAS)
+    // M: Link Foto Bukti Close Shift
+    // N: Link Foto Bukti Setor Omset
+    // O: Pernyataan & Catatan
+    const rowValues = [
+      new Date(),
+      data.kdkmp || '',
+      data.namaPetugas || '',
+      "'" + (data.nomorWa || ''),
+      data.tanggal || '',
+      data.shift || '',
+      Number(data.modalAwal || 0),
+      Number(data.omsetTunai || 0),
+      Number(data.omsetQris || 0),
+      Number(data.totalOmset || 0),
+      Number(data.nominalSetor || 0),
+      data.statusLaporan || '',
+      urlFotoClose || '-',
+      urlFotoSetor || '-',
+      (data.pernyataan || 'Saya bersedia') + (data.catatan ? ' | Catatan: ' + data.catatan : '')
+    ];
+
+    sheet.appendRow(rowValues);
+
+    return createJsonResponse({
+      success: true,
+      message: 'Data berhasil disimpan ke sheet "' + sheet.getName() + '".',
+      sheetName: sheet.getName(),
+      rowNumber: sheet.getLastRow(),
+      fotoCloseUrl: urlFotoClose,
+      fotoSetorUrl: urlFotoSetor
+    });
+
+  } catch (err) {
+    return createJsonResponse({
+      success: false,
+      error: err && err.message ? err.message : String(err)
+    });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function findTargetSheet(ss) {
+  const allSheets = ss.getSheets();
+  for (let i = 0; i < TARGET_SHEET_NAMES.length; i++) {
+    const targetLower = TARGET_SHEET_NAMES[i].trim().toLowerCase();
+    for (let j = 0; j < allSheets.length; j++) {
+      if (allSheets[j].getName().trim().toLowerCase() === targetLower) {
+        return allSheets[j];
+      }
+    }
+  }
+  // Fallback ke sheet pertama jika belum ada, atau buat Form Responses 1
+  return allSheets.length > 0 ? allSheets[0] : ss.insertSheet('Form Responses 1');
+}
+
+function saveBase64ToDrive(dataUrl, fileName) {
+  const parts = dataUrl.split(',');
+  const mimeMatch = parts[0].match(/:(.*?);/);
+  const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+  const bytes = Utilities.base64Decode(parts[1]);
+  const blob = Utilities.newBlob(bytes, mimeType, fileName);
+
+  const folders = DriveApp.getFoldersByName(DRIVE_FOLDER_NAME);
+  const folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(DRIVE_FOLDER_NAME);
+  const file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return file.getUrl();
+}
+
+function createJsonResponse(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+        /**
+         * ============================================================================
+         * 3. STATE APLIKASI & STORAGE KEYS
+         * ============================================================================
+         */
+        const STORAGE_KEYS = {
+            SCRIPT_URL: 'kdkmp_bandung_apps_script_url_v2',
+            PENDING_CLOSES: 'kdkmp_bandung_pending_closes_v2',
+            HISTORY_LOGS: 'kdkmp_bandung_history_logs_v2'
+        };
+
+        let currentMode = 'CLOSE_SHIFT'; // 'CLOSE_SHIFT' | 'SETOR_OMSET' | 'SEKALIGUS' | 'RIWAYAT'
+        let fotoCloseBase64 = '';
+        let fotoCloseExistingUrl = '';
+        let fotoSetorBase64 = '';
+
+        // Helper DOM
+        const $ = (id) => document.getElementById(id);
+
+        /**
+         * ============================================================================
+         * 4. INISIALISASI HALAMAN
+         * ============================================================================
+         */
+        window.addEventListener('DOMContentLoaded', () => {
+            // Set tanggal hari ini (WIB)
+            setTodayDate();
+
+            // Isi pre block Code.gs
+            $('codeGsBlock').textContent = CODE_GS_TEMPLATE;
+
+            // Populate dropdown Kabupaten/Kota
+            initCascadingDropdowns();
+
+            // Bind semua event listener
+            bindEvents();
+
+            // Cek status URL Apps Script
+            updateConnectionStatusUI();
+
+            // Muat badge pending & riwayat
+            refreshPendingAndHistoryUI();
+
+            // Set mode awal
+            switchMode('CLOSE_SHIFT');
+        });
+
+        function setTodayDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            $('tanggalTransaksi').value = `${year}-${month}-${day}`;
+        }
+
+        /**
+         * ============================================================================
+         * 5. STATUS KONEKSI GOOGLE APPS SCRIPT
+         * ============================================================================
+         */
+        function getSavedScriptUrl() {
+            return (localStorage.getItem(STORAGE_KEYS.SCRIPT_URL) || '').trim();
+        }
+
+        function isValidScriptUrl(url) {
+            return /^https:\/\/script\.google\.com\/macros\/s\/[a-zA-Z0-9_-]+\/exec/.test(url);
+        }
+
+        function updateConnectionStatusUI() {
+            const url = getSavedScriptUrl();
+            const dot = $('statusDotHeader');
+            const text = $('statusTextHeader');
+            const banner = $('connectionAlertBanner');
+            const iconBox = $('connectionBannerIcon');
+            const title = $('connectionBannerTitle');
+            const desc = $('connectionBannerDesc');
+            const btnBanner = $('btnOpenConfigBanner');
+
+            if (url && isValidScriptUrl(url)) {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+                text.textContent = 'Sheets Terhubung';
+
+                banner.className = 'rounded-2xl border p-3.5 shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50/90 border-emerald-200 text-emerald-900';
+                iconBox.className = 'w-8 h-8 rounded-xl bg-emerald-200/80 text-emerald-800 flex items-center justify-center shrink-0';
+                iconBox.innerHTML = '<i class="fa-solid fa-cloud-check text-sm"></i>';
+                title.className = 'font-bold text-emerald-950 text-xs sm:text-sm';
+                title.textContent = 'Koneksi Google Sheets Aktif (Form Responses 1)';
+                const shortUrl = url.length > 58 ? url.substring(0, 42) + '...' + url.slice(-12) : url;
+                desc.className = 'text-emerald-800 text-[11px] sm:text-xs font-mono mt-0.5 break-all';
+                desc.textContent = shortUrl;
+                btnBanner.className = 'shrink-0 px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold transition flex items-center justify-center gap-1.5';
+                btnBanner.innerHTML = '<i class="fa-solid fa-sliders"></i><span>Ubah / Test Koneksi</span>';
+            } else if (url) {
+                // URL ada tapi format tidak standar
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+                text.textContent = 'Cek Format URL';
+
+                banner.className = 'rounded-2xl border p-4 shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-50 border-amber-300 text-amber-900';
+                iconBox.className = 'w-9 h-9 rounded-xl bg-amber-200/80 text-amber-800 flex items-center justify-center shrink-0';
+                iconBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-base"></i>';
+                title.textContent = 'Format URL Web App Perlu Diperiksa';
+                desc.innerHTML = 'Pastikan URL berakhiran <code class="bg-amber-100 px-1 rounded">/exec</code> dari hasil <strong>Deploy &gt; Web app</strong> Google Apps Script.';
+                btnBanner.innerHTML = '<i class="fa-solid fa-wrench"></i><span>Perbaiki URL</span>';
             } else {
-                sendData(payload);
+                // URL kosong
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-400 animate-pulse';
+                text.textContent = 'URL Belum Diatur';
+
+                banner.className = 'rounded-2xl border p-4 shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-rose-50 border-rose-300 text-rose-950';
+                iconBox.className = 'w-9 h-9 rounded-xl bg-rose-200/80 text-rose-700 flex items-center justify-center shrink-0';
+                iconBox.innerHTML = '<i class="fa-solid fa-plug-circle-xmark text-base"></i>';
+                title.className = 'font-extrabold text-rose-950';
+                title.textContent = 'Perhatian: URL Google Apps Script Masih Kosong!';
+                desc.className = 'text-rose-800 mt-0.5 leading-relaxed';
+                desc.innerHTML = 'Data tidak akan masuk ke spreadsheet sebelum Anda memasang URL Web App Google Apps Script. Klik tombol di samping untuk memasang & menguji koneksi.';
+                btnBanner.className = 'shrink-0 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-2';
+                btnBanner.innerHTML = '<i class="fa-solid fa-link"></i><span>Pasang URL Sekarang</span>';
             }
         }
 
-        function sendData(payload) {
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.success) {
-                        alert("✅ Data transaksi berhasil disimpan ke Spreadsheet!");
-                        document.getElementById("salesForm").reset();
-                        document.getElementById("tanggal").valueAsDate = new Date();
-                    } else {
-                        alert("❌ Gagal menyimpan: " + (res.error || "Terjadi kesalahan"));
-                    }
-                })
-                .catch(err => {
-                    alert("❌ Terjadi kesalahan jaringan / URL API belum terhubung.");
-                    console.error(err);
-                })
-                .finally(() => {
-                    const btn = document.getElementById("btnSubmit");
-                    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Laporan';
-                    btn.disabled = false;
+        /**
+         * ============================================================================
+         * 6. CASCADING DROPDOWN & QUICK SEARCH 105 KDKMP BANDUNG RAYA
+         * ============================================================================
+         */
+        function initCascadingDropdowns() {
+            const kabList = [...new Set(KDKMP_DATABASE.map(item => item.kab))];
+            const selKab = $('selectKabKota');
+            selKab.innerHTML = '<option value="">-- Pilih Kab / Kota --</option>';
+            kabList.forEach(kab => {
+                const opt = document.createElement('option');
+                opt.value = kab;
+                opt.textContent = kab;
+                selKab.appendChild(opt);
+            });
+        }
+
+        function handleKabKotaChange(selectedKab, preselectKec = '', preselectKode = '') {
+            const selKec = $('selectKecamatan');
+            const selKdkmp = $('selectKdkmp');
+
+            selKec.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+            selKdkmp.innerHTML = '<option value="">-- Pilih Gerai KDKMP --</option>';
+            selKdkmp.disabled = true;
+            $('selectedKdkmpBadge').classList.add('hidden');
+
+            if (!selectedKab) {
+                selKec.disabled = true;
+                return;
+            }
+
+            const kecList = [...new Set(
+                KDKMP_DATABASE.filter(item => item.kab === selectedKab).map(item => item.kec)
+            )].sort();
+
+            kecList.forEach(kec => {
+                const opt = document.createElement('option');
+                opt.value = kec;
+                opt.textContent = kec;
+                selKec.appendChild(opt);
+            });
+
+            selKec.disabled = false;
+
+            if (preselectKec) {
+                selKec.value = preselectKec;
+                handleKecamatanChange(selectedKab, preselectKec, preselectKode);
+            }
+        }
+
+        function handleKecamatanChange(selectedKab, selectedKec, preselectKode = '') {
+            const selKdkmp = $('selectKdkmp');
+            selKdkmp.innerHTML = '<option value="">-- Pilih Gerai KDKMP --</option>';
+            $('selectedKdkmpBadge').classList.add('hidden');
+
+            if (!selectedKab || !selectedKec) {
+                selKdkmp.disabled = true;
+                return;
+            }
+
+            const geraiList = KDKMP_DATABASE.filter(
+                item => item.kab === selectedKab && item.kec === selectedKec
+            ).sort((a, b) => a.desa.localeCompare(b.desa));
+
+            geraiList.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.kode;
+                opt.textContent = `${item.kode} (Desa/Kel. ${item.desa})`;
+                selKdkmp.appendChild(opt);
+            });
+
+            selKdkmp.disabled = false;
+
+            if (preselectKode) {
+                selKdkmp.value = preselectKode;
+                updateSelectedKdkmpBadge(preselectKode);
+            }
+        }
+
+        function updateSelectedKdkmpBadge(kode) {
+            const found = KDKMP_DATABASE.find(item => item.kode === kode);
+            if (!found) {
+                $('selectedKdkmpBadge').classList.add('hidden');
+                return;
+            }
+            $('previewKodeKdkmp').textContent = found.kode;
+            $('previewWilayahKdkmp').textContent = `Kec. ${found.kec} — ${found.kab}`;
+            $('selectedKdkmpBadge').classList.remove('hidden');
+        }
+
+        function selectKdkmpByCode(kode) {
+            const found = KDKMP_DATABASE.find(item => item.kode === kode);
+            if (!found) return;
+            $('selectKabKota').value = found.kab;
+            handleKabKotaChange(found.kab, found.kec, found.kode);
+        }
+
+        function handleQuickSearchInput() {
+            const query = $('quickSearchKdkmp').value.trim().toLowerCase();
+            const resultsBox = $('quickSearchResults');
+            const btnClear = $('btnClearQuickSearch');
+
+            if (!query) {
+                resultsBox.classList.add('hidden');
+                btnClear.classList.add('hidden');
+                return;
+            }
+
+            btnClear.classList.remove('hidden');
+
+            const matches = KDKMP_DATABASE.filter(item =>
+                item.kode.toLowerCase().includes(query) ||
+                item.desa.toLowerCase().includes(query) ||
+                item.kec.toLowerCase().includes(query) ||
+                item.kab.toLowerCase().includes(query)
+            ).slice(0, 15);
+
+            if (matches.length === 0) {
+                resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-500 text-center">Tidak ditemukan gerai KDKMP untuk "<strong>${escapeHtml(query)}</strong>"</div>`;
+                resultsBox.classList.remove('hidden');
+                return;
+            }
+
+            resultsBox.innerHTML = matches.map(item => `
+                <button type="button" data-kode="${escapeHtml(item.kode)}"
+                    class="quick-result-item w-full text-left px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between gap-2">
+                    <div>
+                        <div class="text-xs sm:text-sm font-bold text-emerald-900">${escapeHtml(item.kode)}</div>
+                        <div class="text-[11px] text-slate-500">Kec. ${escapeHtml(item.kec)} • ${escapeHtml(item.kab)}</div>
+                    </div>
+                    <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-lg shrink-0">Pilih</span>
+                </button>
+            `).join('');
+
+            resultsBox.classList.remove('hidden');
+        }
+
+        /**
+         * ============================================================================
+         * 7. PERHITUNGAN RUPIAH & FORMAT NOMOR WA
+         * ============================================================================
+         */
+        function parseRupiah(str) {
+            if (typeof str === 'number') return str;
+            const cleaned = String(str || '').replace(/[^0-9]/g, '');
+            return cleaned ? parseInt(cleaned, 10) : 0;
+        }
+
+        function formatRupiahNumber(num) {
+            return Number(num || 0).toLocaleString('id-ID');
+        }
+
+        function formatRupiahCurrency(num) {
+            return 'Rp ' + formatRupiahNumber(num);
+        }
+
+        function normalizeWaNumber(raw) {
+            let digits = String(raw || '').replace(/[^0-9]/g, '');
+            if (!digits) return '';
+            if (digits.startsWith('62')) {
+                digits = '0' + digits.slice(2);
+            } else if (digits.startsWith('8')) {
+                digits = '0' + digits;
+            }
+            return digits;
+        }
+
+        function recalculateTotals() {
+            const modalAwal = parseRupiah($('modalAwal').value);
+            const omsetTunai = parseRupiah($('omsetTunai').value);
+            const omsetQris = parseRupiah($('omsetQris').value);
+            const nominalSetor = parseRupiah($('nominalSetor').value);
+
+            const totalOmset = omsetTunai + omsetQris;
+            const wajibSetor = omsetTunai; // Modal awal TIDAK disetor (disimpan di kas gerai)
+            const fisikLaci = modalAwal + omsetTunai;
+
+            $('displayTotalOmset').textContent = formatRupiahCurrency(totalOmset);
+            $('displayWajibSetor').textContent = formatRupiahCurrency(wajibSetor);
+            $('displayFisikLaci').textContent = `Fisik Laci: ${formatRupiahCurrency(fisikLaci)}`;
+
+            const badgeSelisih = $('badgeSelisih');
+            if (currentMode === 'CLOSE_SHIFT') {
+                badgeSelisih.className = 'px-2.5 py-1 rounded-lg font-bold bg-amber-100 text-amber-800';
+                badgeSelisih.textContent = `Pending Setor: ${formatRupiahCurrency(wajibSetor)}`;
+                return;
+            }
+
+            const selisih = nominalSetor - wajibSetor;
+            if (wajibSetor === 0 && nominalSetor === 0) {
+                badgeSelisih.className = 'px-2.5 py-1 rounded-lg font-bold bg-slate-200 text-slate-700';
+                badgeSelisih.textContent = 'Rp 0 (Menunggu Input)';
+            } else if (selisih === 0) {
+                badgeSelisih.className = 'px-2.5 py-1 rounded-lg font-bold bg-emerald-100 text-emerald-800';
+                badgeSelisih.innerHTML = '<i class="fa-solid fa-check-circle mr-1"></i> Rp 0 (Sesuai / Lunas)';
+            } else if (selisih < 0) {
+                badgeSelisih.className = 'px-2.5 py-1 rounded-lg font-bold bg-rose-100 text-rose-800';
+                badgeSelisih.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Kurang ${formatRupiahCurrency(Math.abs(selisih))}`;
+            } else {
+                badgeSelisih.className = 'px-2.5 py-1 rounded-lg font-bold bg-blue-100 text-blue-800';
+                badgeSelisih.innerHTML = `<i class="fa-solid fa-circle-info mr-1"></i> Lebih ${formatRupiahCurrency(selisih)}`;
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 8. KOMPRESI GAMBAR OTOMATIS VIA CANVAS
+         * ============================================================================
+         */
+        function compressImageFile(file, maxWidth = 1024, quality = 0.72) {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    reject(new Error('File tidak valid'));
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                        const approxKb = Math.round((compressedDataUrl.length * 3) / 4 / 1024);
+                        resolve({ dataUrl: compressedDataUrl, sizeKb: approxKb });
+                    };
+                    img.onerror = () => reject(new Error('Gagal memproses gambar'));
+                    img.src = event.target.result;
+                };
+                reader.onerror = () => reject(new Error('Gagal membaca file gambar'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        /**
+         * ============================================================================
+         * 9. PENGIRIMAN KE GOOGLE APPS SCRIPT (SOLUSI ANTI-CORS PREFLIGHT & FALLBACK)
+         * ============================================================================
+         * Menggunakan Content-Type: 'text/plain;charset=utf-8' tanpa mode: 'no-cors'
+         * sehingga browser mengirim simple POST request (tanpa preflight OPTIONS)
+         * dan tetap dapat membaca respons JSON asli dari Google Apps Script!
+         */
+        async function postToGoogleAppsScript(scriptUrl, payloadObj) {
+            const jsonString = JSON.stringify(payloadObj);
+
+            // Upaya 1: Standard Simple CORS POST dengan text/plain;charset=utf-8
+            // Google Apps Script mendukung penuh text/plain & mengembalikan Access-Control-Allow-Origin: *
+            try {
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    redirect: 'follow',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: jsonString
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error ${response.status} (${response.statusText})`);
+                }
+
+                const rawText = await response.text();
+                let parsed;
+                try {
+                    parsed = JSON.parse(rawText);
+                } catch (parseErr) {
+                    // Jika Google mengembalikan halaman HTML login/error karena izin akses belum "Anyone"
+                    if (rawText.includes('ServiceLogin') || rawText.includes('accounts.google.com')) {
+                        throw new Error('Akses ditolak Google. Pastikan deployment Apps Script disetel ke "Who has access: Anyone".');
+                    }
+                    throw new Error('Respons Apps Script bukan JSON valid: ' + rawText.substring(0, 120));
+                }
+
+                if (parsed && parsed.success === false) {
+                    throw new Error(parsed.error || 'Apps Script mengembalikan status gagal.');
+                }
+
+                return {
+                    delivered: true,
+                    verified: true,
+                    mode: 'CORS_JSON',
+                    data: parsed
+                };
+            } catch (primaryErr) {
+                console.warn('Primary fetch (text/plain) mengalami kendala, mencoba fallback:', primaryErr);
+
+                // Jika error jelas berasal dari konfigurasi akses Google atau error script internal, lempar langsung
+                if (
+                    primaryErr.message.includes('Who has access: Anyone') ||
+                    primaryErr.message.includes('Apps Script mengembalikan status gagal')
+                ) {
+                    throw primaryErr;
+                }
+
+                // Upaya 2: Fallback no-cors (untuk lingkungan iframe/sandbox ketat yang memblokir redirect cross-origin)
+                try {
+                    await fetch(scriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        redirect: 'follow',
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8'
+                        },
+                        body: jsonString
+                    });
+
+                    return {
+                        delivered: true,
+                        verified: false,
+                        mode: 'NO_CORS_FALLBACK',
+                        warning: primaryErr.message
+                    };
+                } catch (fallbackErr) {
+                    throw new Error(`Gagal terhubung ke server Google Apps Script (${primaryErr.message}). Periksa koneksi internet atau URL Web App.`);
+                }
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 10. ALUR KERJA 2 TAHAP & SUBMIT FORM
+         * ============================================================================
+         */
+        function switchMode(mode) {
+            currentMode = mode;
+
+            // Update styling tab
+            document.querySelectorAll('.mode-tab').forEach(btn => {
+                const isTarget = btn.dataset.mode === mode;
+                if (isTarget) {
+                    btn.className = 'mode-tab active flex flex-col items-center justify-center py-2.5 px-3 rounded-xl text-xs font-bold transition text-center bg-emerald-700 text-white shadow-sm relative';
+                } else {
+                    btn.className = 'mode-tab flex flex-col items-center justify-center py-2.5 px-3 rounded-xl text-xs font-bold transition text-center text-slate-600 hover:bg-slate-100 relative';
+                }
+            });
+
+            if (mode === 'RIWAYAT') {
+                $('formContainer').classList.add('hidden');
+                $('riwayatContainer').classList.remove('hidden');
+                refreshPendingAndHistoryUI();
+                return;
+            }
+
+            $('formContainer').classList.remove('hidden');
+            $('riwayatContainer').classList.add('hidden');
+
+            if (mode === 'CLOSE_SHIFT') {
+                $('pendingSelectorBox').classList.add('hidden');
+                $('nominalSetor').value = '0';
+                $('nominalSetor').readOnly = true;
+                $('nominalSetor').classList.add('bg-slate-100', 'text-slate-500');
+                $('metodeSetor').value = 'Belum Setor (Close Shift)';
+                $('starNominalSetor').classList.add('hidden');
+                $('btnSetorPas').classList.add('hidden');
+
+                $('badgeWajibFotoClose').textContent = 'Wajib';
+                $('badgeWajibFotoClose').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700';
+                $('badgeWajibFotoSetor').textContent = 'Opsional saat Close';
+                $('badgeWajibFotoSetor').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600';
+
+                $('btnSubmitLabel').textContent = 'Simpan & Kirim Laporan Close Shift';
+            } else if (mode === 'SETOR_OMSET') {
+                $('pendingSelectorBox').classList.remove('hidden');
+                renderPendingCards();
+                $('nominalSetor').readOnly = false;
+                $('nominalSetor').classList.remove('bg-slate-100', 'text-slate-500');
+                if ($('metodeSetor').value === 'Belum Setor (Close Shift)') {
+                    $('metodeSetor').value = 'Transfer Bank BRI';
+                }
+                $('starNominalSetor').classList.remove('hidden');
+                $('btnSetorPas').classList.remove('hidden');
+
+                $('badgeWajibFotoClose').textContent = 'Terlampir / Opsional';
+                $('badgeWajibFotoClose').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700';
+                $('badgeWajibFotoSetor').textContent = 'Wajib Bukti Transfer';
+                $('badgeWajibFotoSetor').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700';
+
+                $('btnSubmitLabel').textContent = 'Simpan & Kirim Pelaporan Setor Omset';
+            } else if (mode === 'SEKALIGUS') {
+                $('pendingSelectorBox').classList.add('hidden');
+                $('nominalSetor').readOnly = false;
+                $('nominalSetor').classList.remove('bg-slate-100', 'text-slate-500');
+                if ($('metodeSetor').value === 'Belum Setor (Close Shift)') {
+                    $('metodeSetor').value = 'Transfer Bank BRI';
+                }
+                $('starNominalSetor').classList.remove('hidden');
+                $('btnSetorPas').classList.remove('hidden');
+
+                $('badgeWajibFotoClose').textContent = 'Wajib';
+                $('badgeWajibFotoClose').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700';
+                $('badgeWajibFotoSetor').textContent = 'Wajib';
+                $('badgeWajibFotoSetor').className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700';
+
+                $('btnSubmitLabel').textContent = 'Simpan & Kirim Close Shift + Setor Lunas';
+            }
+
+            recalculateTotals();
+        }
+
+        function getPendingCloses() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_CLOSES) || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function savePendingCloses(list) {
+            localStorage.setItem(STORAGE_KEYS.PENDING_CLOSES, JSON.stringify(list));
+            refreshPendingAndHistoryUI();
+        }
+
+        function getHistoryLogs() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEYS.HISTORY_LOGS) || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function saveHistoryLogs(list) {
+            localStorage.setItem(STORAGE_KEYS.HISTORY_LOGS, JSON.stringify(list));
+            refreshPendingAndHistoryUI();
+        }
+
+        function renderPendingCards() {
+            const list = getPendingCloses();
+            const container = $('pendingCardsList');
+            $('pendingCountText').textContent = `${list.length} Pending`;
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="md:col-span-2 p-4 rounded-xl bg-white border border-amber-200 text-center text-xs text-slate-600">
+                        Belum ada antrean Close Shift lokal yang menunggu pelunasan setor. Anda tetap dapat mengisi form di bawah secara manual.
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => `
+                <div class="p-3.5 rounded-xl bg-white border border-amber-300 hover:border-emerald-500 shadow-xs transition flex flex-col justify-between gap-2.5">
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-extrabold text-emerald-900">${escapeHtml(item.kdkmp)}</span>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">${escapeHtml(item.shift)}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500 mt-1">
+                            Tgl: <strong>${escapeHtml(item.tanggal)}</strong> • Petugas: <strong>${escapeHtml(item.namaPetugas)}</strong>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                            <span class="text-slate-600">Wajib Setor Tunai:</span>
+                            <strong class="text-emerald-800 text-sm">${formatRupiahCurrency(item.omsetTunai)}</strong>
+                        </div>
+                    </div>
+                    <button type="button" data-pending-id="${escapeHtml(item.id)}"
+                        class="btn-load-pending w-full py-2 px-3 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-arrow-down-to-line"></i>
+                        <span>Muat Data & Lanjutkan Setor</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function loadPendingRecordIntoForm(pendingId) {
+            const list = getPendingCloses();
+            const record = list.find(r => r.id === pendingId);
+            if (!record) return;
+
+            $('pendingRecordId').value = record.id;
+            selectKdkmpByCode(record.kdkmp);
+            $('tanggalTransaksi').value = record.tanggal;
+            $('selectShift').value = record.shift;
+            $('namaPetugas').value = record.namaPetugas;
+            $('nomorWa').value = record.nomorWa;
+
+            $('modalAwal').value = formatRupiahNumber(record.modalAwal);
+            $('omsetTunai').value = formatRupiahNumber(record.omsetTunai);
+            $('omsetQris').value = formatRupiahNumber(record.omsetQris);
+            $('nominalSetor').value = formatRupiahNumber(record.omsetTunai); // Otomatis isi sesuai wajib setor
+            $('catatanTambahan').value = record.catatan || '';
+
+            fotoCloseExistingUrl = record.fotoCloseShiftUrl || '';
+            if (record.fotoCloseShiftBase64) {
+                fotoCloseBase64 = record.fotoCloseShiftBase64;
+                $('imgPreviewClose').src = fotoCloseBase64;
+                $('previewContainerClose').classList.remove('hidden');
+                $('infoFotoClose').innerHTML = '<i class="fa-solid fa-check-circle"></i> <span>Foto Close Shift dimuat dari Tahap 1</span>';
+            }
+
+            recalculateTotals();
+            showToast(`Data Close Shift ${record.kdkmp} berhasil dimuat! Silakan upload bukti transfer.`);
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const kdkmp = $('selectKdkmp').value.trim();
+            const tanggal = $('tanggalTransaksi').value.trim();
+            const shift = $('selectShift').value.trim();
+            const namaPetugas = $('namaPetugas').value.trim();
+            const nomorWaNormalized = normalizeWaNumber($('nomorWa').value);
+            $('nomorWa').value = nomorWaNormalized;
+
+            const modalAwal = parseRupiah($('modalAwal').value);
+            const omsetTunai = parseRupiah($('omsetTunai').value);
+            const omsetQris = parseRupiah($('omsetQris').value);
+            const totalOmset = omsetTunai + omsetQris;
+            const nominalSetor = currentMode === 'CLOSE_SHIFT' ? 0 : parseRupiah($('nominalSetor').value);
+            const metodeSetor = $('metodeSetor').value;
+            const catatan = $('catatanTambahan').value.trim();
+            const pernyataanChecked = $('checkPernyataan').checked;
+
+            // Validasi input wajib
+            if (!kdkmp) {
+                showStatusModal('warning', 'Gerai KDKMP Belum Dipilih', 'Silakan pilih Kabupaten/Kota, Kecamatan, dan Gerai KDKMP (Desa_Kecamatan) terlebih dahulu.');
+                return;
+            }
+            if (!tanggal || !namaPetugas || !nomorWaNormalized || nomorWaNormalized.length < 9) {
+                showStatusModal('warning', 'Data Petugas Belum Lengkap', 'Pastikan Tanggal, Nama Petugas, dan Nomor WhatsApp (format 08...) telah diisi dengan benar.');
+                return;
+            }
+            if (omsetTunai <= 0 && omsetQris <= 0) {
+                showStatusModal('warning', 'Nominal Omset Masih Rp 0', 'Silakan masukkan nominal Omset Penjualan Tunai atau QRIS terlebih dahulu.');
+                return;
+            }
+            if ((currentMode === 'CLOSE_SHIFT' || currentMode === 'SEKALIGUS') && !fotoCloseBase64 && !fotoCloseExistingUrl) {
+                showStatusModal('warning', 'Foto Close Shift Wajib Diupload', 'Silakan lampirkan foto bukti Close Shift / struk tutup kasir.');
+                return;
+            }
+            if ((currentMode === 'SETOR_OMSET' || currentMode === 'SEKALIGUS') && nominalSetor <= 0 && omsetTunai > 0) {
+                showStatusModal('warning', 'Nominal Setor Belum Diisi', 'Silakan isi nominal uang tunai yang disetorkan.');
+                return;
+            }
+            if ((currentMode === 'SETOR_OMSET' || currentMode === 'SEKALIGUS') && !fotoSetorBase64) {
+                showStatusModal('warning', 'Foto Bukti Setor Wajib Diupload', 'Silakan lampirkan foto bukti transfer atau resi setor omset.');
+                return;
+            }
+            if (!pernyataanChecked) {
+                showStatusModal('warning', 'Centang Pernyataan', 'Silakan centang kotak pernyataan "Saya bersedia" sebelum mengirim laporan.');
+                return;
+            }
+
+            let statusLaporan = 'CLOSE SHIFT (BELUM SETOR)';
+            let successHeadline = 'Sudah Close Shift!';
+            if (currentMode === 'SETOR_OMSET') {
+                statusLaporan = `SETOR OMSET (${metodeSetor})`;
+                successHeadline = 'Sudah Setor Omset!';
+            } else if (currentMode === 'SEKALIGUS') {
+                statusLaporan = `CLOSE & SETOR LUNAS (${metodeSetor})`;
+                successHeadline = 'Sudah Close Shift & Setor Omset!';
+            }
+
+            const recordId = $('pendingRecordId').value || ('KDKMP-' + Date.now());
+            const payload = {
+                action: 'SUBMIT_LAPORAN',
+                recordId,
+                timestampClient: new Date().toISOString(),
+                kdkmp,
+                namaPetugas,
+                nomorWa: nomorWaNormalized,
+                tanggal,
+                shift,
+                modalAwal,
+                omsetTunai,
+                omsetQris,
+                totalOmset,
+                nominalSetor,
+                statusLaporan,
+                metodeSetor,
+                fotoCloseShiftBase64: fotoCloseBase64,
+                fotoCloseShiftUrl: fotoCloseExistingUrl,
+                fotoSetorOmsetBase64: fotoSetorBase64,
+                pernyataan: 'Saya bersedia',
+                catatan
+            };
+
+            const scriptUrl = getSavedScriptUrl();
+            $('loadingOverlay').classList.remove('hidden');
+            $('loadingTitle').textContent = scriptUrl ? 'Mengirim ke Google Sheets...' : 'Menyimpan Data Lokal...';
+            $('loadingSubtitle').textContent = scriptUrl
+                ? `Mengirim laporan ${kdkmp} ke Form Responses 1`
+                : 'URL Apps Script belum diatur, menyimpan ke antrean lokal';
+
+            let syncStatus = 'LOKAL_ONLY';
+            let sheetInfoMsg = '';
+
+            try {
+                if (scriptUrl) {
+                    const result = await postToGoogleAppsScript(scriptUrl, payload);
+                    if (result.verified) {
+                        syncStatus = 'TERKIRIM_SHEETS';
+                        const rowNum = result.data && result.data.rowNumber ? ` (Baris ke-${result.data.rowNumber})` : '';
+                        const sName = result.data && result.data.sheetName ? result.data.sheetName : 'Form Responses 1';
+                        sheetInfoMsg = `Terkonfirmasi masuk ke Google Sheets "${sName}"${rowNum}.`;
+                        if (result.data && result.data.fotoCloseUrl) {
+                            payload.fotoCloseShiftUrl = result.data.fotoCloseUrl;
+                        }
+                    } else {
+                        syncStatus = 'TERKIRIM_UNVERIFIED';
+                        sheetInfoMsg = 'Request terkirim via mode kompatibilitas browser (no-cors fallback). Silakan cek spreadsheet Form Responses 1 untuk memastikan baris masuk.';
+                    }
+                } else {
+                    syncStatus = 'BELUM_ADA_URL';
+                    sheetInfoMsg = 'PERHATIAN: URL Web App Google Apps Script belum dipasang, sehingga data baru tersimpan di perangkat ini (belum masuk ke Google Sheets).';
+                }
+
+                // Kelola antrean Pending Close Shift (Tahap 1 -> Tahap 2)
+                let pendingList = getPendingCloses();
+                if (currentMode === 'CLOSE_SHIFT') {
+                    // Simpan ke pending agar bisa dilanjutkan saat setor omset
+                    const pendingItem = {
+                        ...payload,
+                        // Hindari melebihi kuota localStorage jika foto terlalu besar
+                        fotoCloseShiftBase64: payload.fotoCloseShiftBase64.length < 180000 ? payload.fotoCloseShiftBase64 : ''
+                    };
+                    pendingList = [pendingItem, ...pendingList.filter(p => p.id !== recordId)];
+                    savePendingCloses(pendingList);
+                } else if ($('pendingRecordId').value) {
+                    // Hapus dari pending karena sudah disetor
+                    pendingList = pendingList.filter(p => p.id !== $('pendingRecordId').value);
+                    savePendingCloses(pendingList);
+                }
+
+                // Simpan ke Riwayat Log Lokal (tanpa base64 berat)
+                const historyLogs = getHistoryLogs();
+                const logEntry = {
+                    ...payload,
+                    id: recordId,
+                    fotoCloseShiftBase64: '',
+                    fotoSetorOmsetBase64: '',
+                    syncStatus,
+                    savedAt: new Date().toLocaleString('id-ID')
+                };
+                saveHistoryLogs([logEntry, ...historyLogs].slice(0, 100));
+
+                // Reset Form Bersih Otomatis
+                resetFormClean();
+
+                // Tampilkan Banner & Pop-up Sukses
+                showPersistentSuccessBanner(
+                    successHeadline,
+                    `${kdkmp} • Petugas: ${namaPetugas} • Omset Tunai: ${formatRupiahCurrency(omsetTunai)} • Disetor: ${formatRupiahCurrency(nominalSetor)}. ${sheetInfoMsg}`
+                );
+
+                showStatusModal(
+                    syncStatus === 'BELUM_ADA_URL' ? 'warning' : 'success',
+                    successHeadline,
+                    sheetInfoMsg,
+                    [
+                        { label: 'Gerai KDKMP', value: kdkmp },
+                        { label: 'Petugas / Shift', value: `${namaPetugas} (${shift})` },
+                        { label: 'Omset Tunai (Wajib Setor)', value: formatRupiahCurrency(omsetTunai) },
+                        { label: 'Nominal Disetor', value: formatRupiahCurrency(nominalSetor) },
+                        { label: 'Status Tahap', value: statusLaporan }
+                    ]
+                );
+
+            } catch (err) {
+                console.error('Error submit laporan:', err);
+                showStatusModal(
+                    'error',
+                    'Gagal Mengirim ke Google Sheets',
+                    `Terjadi kendala jaringan/server: ${err.message}. Pastikan URL Web App benar dan akses deployment disetel ke "Anyone".`
+                );
+            } finally {
+                $('loadingOverlay').classList.add('hidden');
+            }
+        }
+
+        function resetFormClean() {
+            $('kdkmpForm').reset();
+            $('pendingRecordId').value = '';
+            setTodayDate();
+
+            $('selectKabKota').value = '';
+            $('selectKecamatan').innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+            $('selectKecamatan').disabled = true;
+            $('selectKdkmp').innerHTML = '<option value="">-- Pilih Gerai KDKMP --</option>';
+            $('selectKdkmp').disabled = true;
+            $('selectedKdkmpBadge').classList.add('hidden');
+
+            $('quickSearchKdkmp').value = '';
+            $('quickSearchResults').classList.add('hidden');
+            $('btnClearQuickSearch').classList.add('hidden');
+
+            $('modalAwal').value = '0';
+            $('omsetTunai').value = '0';
+            $('omsetQris').value = '0';
+            $('nominalSetor').value = '0';
+
+            fotoCloseBase64 = '';
+            fotoCloseExistingUrl = '';
+            fotoSetorBase64 = '';
+            $('previewContainerClose').classList.add('hidden');
+            $('previewContainerSetor').classList.add('hidden');
+
+            switchMode(currentMode);
+        }
+
+        /**
+         * ============================================================================
+         * 11. TEST KONEKSI & BARIS UJI DI MODAL PENGATURAN
+         * ============================================================================
+         */
+        async function handleTestConnection() {
+            const urlInput = $('inputAppsScriptUrl').value.trim();
+            const resultBox = $('testConnectionResult');
+
+            if (!urlInput) {
+                resultBox.className = 'p-3 rounded-xl text-xs leading-relaxed border bg-rose-50 border-rose-200 text-rose-800';
+                resultBox.innerHTML = '<strong>URL masih kosong!</strong> Masukkan URL Web App Google Apps Script terlebih dahulu.';
+                resultBox.classList.remove('hidden');
+                return;
+            }
+
+            // Simpan sekalian URL-nya
+            localStorage.setItem(STORAGE_KEYS.SCRIPT_URL, urlInput);
+            updateConnectionStatusUI();
+
+            resultBox.className = 'p-3 rounded-xl text-xs leading-relaxed border bg-blue-50 border-blue-200 text-blue-800';
+            resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Menghubungi Google Apps Script & mengirim baris uji ke <strong>Form Responses 1</strong>...';
+            resultBox.classList.remove('hidden');
+
+            try {
+                const res = await postToGoogleAppsScript(urlInput, {
+                    action: 'TEST_CONNECTION',
+                    timestampClient: new Date().toISOString()
+                });
+
+                if (res.verified) {
+                    resultBox.className = 'p-3 rounded-xl text-xs leading-relaxed border bg-emerald-50 border-emerald-300 text-emerald-900';
+                    resultBox.innerHTML = `
+                        <div class="font-extrabold flex items-center gap-1.5 text-emerald-800">
+                            <i class="fa-solid fa-circle-check"></i> KONEKSI BERHASIL & TERVERIFIKASI!
+                        </div>
+                        <p class="mt-1">${escapeHtml(res.data.message || 'Baris uji berhasil masuk ke spreadsheet.')} (Baris ke-${res.data.rowNumber || '?'})</p>
+                    `;
+                } else {
+                    resultBox.className = 'p-3 rounded-xl text-xs leading-relaxed border bg-amber-50 border-amber-300 text-amber-900';
+                    resultBox.innerHTML = `
+                        <div class="font-extrabold flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Terkirim via Fallback (no-cors)
+                        </div>
+                        <p class="mt-1">Browser membatasi pembacaan respons JSON secara langsung, namun request telah dikirim. Silakan buka Google Sheets tab <strong>Form Responses 1</strong> untuk memastikan baris <code>TEST_KONEKSI_OK</code> muncul.</p>
+                    `;
+                }
+            } catch (err) {
+                resultBox.className = 'p-3 rounded-xl text-xs leading-relaxed border bg-rose-50 border-rose-300 text-rose-900';
+                resultBox.innerHTML = `
+                    <div class="font-extrabold flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-xmark"></i> Koneksi Gagal
+                    </div>
+                    <p class="mt-1">${escapeHtml(err.message)}</p>
+                `;
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 12. RIWAYAT LOG & KIRIM ULANG YANG BELUM TERKIRIM
+         * ============================================================================
+         */
+        function refreshPendingAndHistoryUI() {
+            const pending = getPendingCloses();
+            const badgeTab = $('pendingBadgeTab');
+            if (pending.length > 0) {
+                badgeTab.textContent = pending.length;
+                badgeTab.classList.remove('hidden');
+            } else {
+                badgeTab.classList.add('hidden');
+            }
+
+            const logs = getHistoryLogs();
+            const tbody = $('historyTableBody');
+            if (!tbody) return;
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-slate-400">
+                            Belum ada riwayat laporan di perangkat ini.
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = logs.map((log, idx) => {
+                let statusBadge = '';
+                if (log.syncStatus === 'TERKIRIM_SHEETS') {
+                    statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800"><i class="fa-solid fa-check mr-1"></i>Masuk Sheets</span>';
+                } else if (log.syncStatus === 'TERKIRIM_UNVERIFIED') {
+                    statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">Terkirim (Fallback)</span>';
+                } else {
+                    statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">Belum Terkirim</span>';
+                }
+
+                const canRetry = log.syncStatus !== 'TERKIRIM_SHEETS';
+
+                return `
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-2.5 px-3 whitespace-nowrap">
+                            <div class="font-semibold text-slate-800">${escapeHtml(log.tanggal)}</div>
+                            <div class="text-[10px] text-slate-400">${escapeHtml(log.savedAt || '')}</div>
+                        </td>
+                        <td class="py-2.5 px-3">
+                            <div class="font-bold text-emerald-900">${escapeHtml(log.kdkmp)}</div>
+                            <div class="text-[10px] text-slate-500">${escapeHtml(log.namaPetugas)} (${escapeHtml(log.nomorWa)})</div>
+                        </td>
+                        <td class="py-2.5 px-3">
+                            <span class="font-semibold text-slate-700">${escapeHtml(log.statusLaporan)}</span>
+                        </td>
+                        <td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">
+                            ${formatRupiahCurrency(log.omsetTunai)}
+                        </td>
+                        <td class="py-2.5 px-3 text-right font-bold text-emerald-700 whitespace-nowrap">
+                            ${formatRupiahCurrency(log.nominalSetor)}
+                        </td>
+                        <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                            ${statusBadge}
+                        </td>
+                        <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                            ${canRetry ? `<button type="button" data-retry-idx="${idx}" class="btn-retry-log px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold">Kirim Ulang</button>` : '<span class="text-slate-400 text-[11px]">OK</span>'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function retrySingleLog(index) {
+            const scriptUrl = getSavedScriptUrl();
+            if (!scriptUrl) {
+                openConfigModal();
+                return;
+            }
+            const logs = getHistoryLogs();
+            const item = logs[index];
+            if (!item) return;
+
+            $('loadingOverlay').classList.remove('hidden');
+            $('loadingTitle').textContent = 'Mengirim Ulang ke Google Sheets...';
+            $('loadingSubtitle').textContent = item.kdkmp;
+
+            try {
+                const res = await postToGoogleAppsScript(scriptUrl, item);
+                logs[index].syncStatus = res.verified ? 'TERKIRIM_SHEETS' : 'TERKIRIM_UNVERIFIED';
+                saveHistoryLogs(logs);
+                showStatusModal('success', 'Berhasil Dikirim Ulang!', `Laporan ${item.kdkmp} telah berhasil dikirim ke Google Sheets.`);
+            } catch (err) {
+                showStatusModal('error', 'Gagal Kirim Ulang', err.message);
+            } finally {
+                $('loadingOverlay').classList.add('hidden');
+            }
+        }
+
+        async function syncAllUnsyncedLogs() {
+            const scriptUrl = getSavedScriptUrl();
+            if (!scriptUrl) {
+                openConfigModal();
+                return;
+            }
+            const logs = getHistoryLogs();
+            const unsyncedIndices = logs
+                .map((item, idx) => (item.syncStatus !== 'TERKIRIM_SHEETS' ? idx : -1))
+                .filter(idx => idx !== -1);
+
+            if (unsyncedIndices.length === 0) {
+                showStatusModal('success', 'Semua Data Sudah Tersinkron', 'Tidak ada laporan tertunda yang perlu dikirim ulang.');
+                return;
+            }
+
+            $('loadingOverlay').classList.remove('hidden');
+            $('loadingTitle').textContent = `Menyinkronkan ${unsyncedIndices.length} Laporan...`;
+
+            let successCount = 0;
+            for (const idx of unsyncedIndices) {
+                try {
+                    const res = await postToGoogleAppsScript(scriptUrl, logs[idx]);
+                    logs[idx].syncStatus = res.verified ? 'TERKIRIM_SHEETS' : 'TERKIRIM_UNVERIFIED';
+                    successCount++;
+                } catch (err) {
+                    console.error('Gagal sync item:', err);
+                }
+            }
+
+            saveHistoryLogs(logs);
+            $('loadingOverlay').classList.add('hidden');
+            showStatusModal('success', 'Sinkronisasi Selesai', `${successCount} dari ${unsyncedIndices.length} laporan berhasil dikirim ke Google Sheets.`);
+        }
+
+        /**
+         * ============================================================================
+         * 13. UI MODALS, TOAST & EVENT BINDINGS
+         * ============================================================================
+         */
+        function openConfigModal() {
+            $('inputAppsScriptUrl').value = getSavedScriptUrl();
+            $('testConnectionResult').classList.add('hidden');
+            $('configModal').classList.remove('hidden');
+        }
+
+        function showPersistentSuccessBanner(title, detail) {
+            $('bannerSuccessTitle').textContent = title;
+            $('bannerSuccessDetail').textContent = detail;
+            $('persistentSuccessBanner').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showStatusModal(type, title, message, metaItems = []) {
+            const iconWrap = $('statusModalIconWrapper');
+            const icon = $('statusModalIcon');
+
+            if (type === 'success') {
+                iconWrap.className = 'w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-3xl shadow-inner';
+                icon.className = 'fa-solid fa-circle-check';
+            } else if (type === 'warning') {
+                iconWrap.className = 'w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 mx-auto flex items-center justify-center text-3xl shadow-inner';
+                icon.className = 'fa-solid fa-triangle-exclamation';
+            } else {
+                iconWrap.className = 'w-16 h-16 rounded-2xl bg-rose-100 text-rose-600 mx-auto flex items-center justify-center text-3xl shadow-inner';
+                icon.className = 'fa-solid fa-circle-xmark';
+            }
+
+            $('statusModalTitle').textContent = title;
+            $('statusModalMessage').textContent = message;
+
+            const metaBox = $('statusModalMeta');
+            if (metaItems.length > 0) {
+                metaBox.innerHTML = metaItems.map(m => `
+                    <div class="flex justify-between gap-2 py-0.5 border-b border-slate-200/60 last:border-0">
+                        <span class="text-slate-500">${escapeHtml(m.label)}:</span>
+                        <strong class="text-slate-800 text-right">${escapeHtml(m.value)}</strong>
+                    </div>
+                `).join('');
+                metaBox.classList.remove('hidden');
+            } else {
+                metaBox.classList.add('hidden');
+            }
+
+            $('statusModal').classList.remove('hidden');
+        }
+
+        function showToast(msg) {
+            const existing = document.getElementById('floatingToast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'floatingToast';
+            toast.className = 'fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl border border-slate-700 animate-pop-in flex items-center gap-2';
+            toast.innerHTML = `<i class="fa-solid fa-circle-info text-emerald-400"></i><span>${escapeHtml(msg)}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function bindEvents() {
+            // Mode Tabs
+            document.querySelectorAll('.mode-tab').forEach(btn => {
+                btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+            });
+
+            // Cascading Dropdowns
+            $('selectKabKota').addEventListener('change', (e) => {
+                handleKabKotaChange(e.target.value);
+            });
+            $('selectKecamatan').addEventListener('change', (e) => {
+                handleKecamatanChange($('selectKabKota').value, e.target.value);
+            });
+            $('selectKdkmp').addEventListener('change', (e) => {
+                updateSelectedKdkmpBadge(e.target.value);
+            });
+
+            // Quick Search KDKMP (klik responsif dengan mousedown/click)
+            $('quickSearchKdkmp').addEventListener('input', handleQuickSearchInput);
+            $('quickSearchKdkmp').addEventListener('focus', handleQuickSearchInput);
+            $('btnClearQuickSearch').addEventListener('click', () => {
+                $('quickSearchKdkmp').value = '';
+                $('quickSearchResults').classList.add('hidden');
+                $('btnClearQuickSearch').classList.add('hidden');
+            });
+
+            $('quickSearchResults').addEventListener('click', (e) => {
+                const btn = e.target.closest('.quick-result-item');
+                if (!btn) return;
+                const kode = btn.dataset.kode;
+                selectKdkmpByCode(kode);
+                $('quickSearchKdkmp').value = kode;
+                $('quickSearchResults').classList.add('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#quickSearchKdkmp') && !e.target.closest('#quickSearchResults')) {
+                    $('quickSearchResults').classList.add('hidden');
+                }
+            });
+
+            // Format WA otomatis saat blur
+            $('nomorWa').addEventListener('blur', (e) => {
+                e.target.value = normalizeWaNumber(e.target.value);
+            });
+
+            // Format Rupiah & Kalkulasi otomatis
+            document.querySelectorAll('.rupiah-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const num = parseRupiah(e.target.value);
+                    e.target.value = formatRupiahNumber(num);
+                    recalculateTotals();
+                });
+            });
+
+            $('btnSetorPas').addEventListener('click', () => {
+                const omsetTunai = parseRupiah($('omsetTunai').value);
+                $('nominalSetor').value = formatRupiahNumber(omsetTunai);
+                recalculateTotals();
+            });
+
+            // Upload Foto 1: Close Shift
+            $('inputFotoCloseShift').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const { dataUrl, sizeKb } = await compressImageFile(file);
+                    fotoCloseBase64 = dataUrl;
+                    $('imgPreviewClose').src = dataUrl;
+                    $('previewContainerClose').classList.remove('hidden');
+                    $('infoFotoClose').innerHTML = `<i class="fa-solid fa-check-circle"></i> <span>Terkompresi (${sizeKb} KB) • Siap dikirim</span>`;
+                } catch (err) {
+                    showToast('Gagal memproses foto Close Shift: ' + err.message);
+                }
+            });
+
+            $('btnRemoveFotoClose').addEventListener('click', () => {
+                fotoCloseBase64 = '';
+                fotoCloseExistingUrl = '';
+                $('inputFotoCloseShift').value = '';
+                $('previewContainerClose').classList.add('hidden');
+            });
+
+            // Upload Foto 2: Setor Omset
+            $('inputFotoSetor').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const { dataUrl, sizeKb } = await compressImageFile(file);
+                    fotoSetorBase64 = dataUrl;
+                    $('imgPreviewSetor').src = dataUrl;
+                    $('previewContainerSetor').classList.remove('hidden');
+                    $('infoFotoSetor').innerHTML = `<i class="fa-solid fa-check-circle"></i> <span>Terkompresi (${sizeKb} KB) • Siap dikirim</span>`;
+                } catch (err) {
+                    showToast('Gagal memproses foto Bukti Setor: ' + err.message);
+                }
+            });
+
+            $('btnRemoveFotoSetor').addEventListener('click', () => {
+                fotoSetorBase64 = '';
+                $('inputFotoSetor').value = '';
+                $('previewContainerSetor').classList.add('hidden');
+            });
+
+            // Pending Cards Click Delegation
+            $('pendingCardsList').addEventListener('click', (e) => {
+                const btn = e.target.closest('.btn-load-pending');
+                if (!btn) return;
+                loadPendingRecordIntoForm(btn.dataset.pendingId);
+            });
+
+            // Form Submit & Reset
+            $('kdkmpForm').addEventListener('submit', handleFormSubmit);
+            $('btnResetForm').addEventListener('click', () => {
+                resetFormClean();
+                showToast('Formulir telah dibersihkan.');
+            });
+
+            // Modal Pengaturan Google Apps Script
+            $('btnOpenConfigHeader').addEventListener('click', openConfigModal);
+            $('btnOpenConfigBanner').addEventListener('click', openConfigModal);
+            $('btnCloseConfigModal').addEventListener('click', () => $('configModal').classList.add('hidden'));
+
+            $('btnSaveAppsScriptUrl').addEventListener('click', () => {
+                const url = $('inputAppsScriptUrl').value.trim();
+                localStorage.setItem(STORAGE_KEYS.SCRIPT_URL, url);
+                updateConnectionStatusUI();
+                showToast(url ? 'URL Web App Google Apps Script disimpan!' : 'URL Web App dikosongkan.');
+            });
+
+            $('btnTestConnection').addEventListener('click', handleTestConnection);
+
+            // Salin Code.gs (menggunakan execCommand fallback agar aman di iframe)
+            $('btnCopyCodeGs').addEventListener('click', () => {
+                const textarea = document.createElement('textarea');
+                textarea.value = CODE_GS_TEMPLATE;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('Kode Code.gs berhasil disalin ke clipboard!');
+            });
+
+            // Modal Status Close
+            $('btnCloseStatusModal').addEventListener('click', () => $('statusModal').classList.add('hidden'));
+
+            // Riwayat Actions
+            $('historyTableBody').addEventListener('click', (e) => {
+                const btn = e.target.closest('.btn-retry-log');
+                if (!btn) return;
+                retrySingleLog(parseInt(btn.dataset.retryIdx, 10));
+            });
+
+            $('btnSyncAllUnsynced').addEventListener('click', syncAllUnsyncedLogs);
+            $('btnClearHistory').addEventListener('click', () => {
+                saveHistoryLogs([]);
+                showToast('Riwayat log lokal dibersihkan.');
+            });
         }
     </script>
 </body>
 
 </html>
-

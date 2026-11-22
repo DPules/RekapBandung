@@ -1,4 +1,4 @@
-// ⚠️ GANTI DENGAN URL DEPLOYMENT WEB APP APPS SCRIPT ANDA (Berakhiran /exec)
+// ⚠️ GANTI DENGAN URL DEPLOYMENT WEB APP APPS SCRIPT TERBARU (Berakhiran /exec)
 const API_URL = "https://script.google.com/macros/s/AKfycbyBs-njA5p7SukhDamHQ3hCg4-N4BqGFiY5T5-HfSKm2Xz3sQvDL9Yg7mZUhBsQb2B_/exec";
 
 let dashboardData = null;
@@ -63,7 +63,7 @@ function toISODate(dateVal) {
 
   if (str.includes("-") || str.includes("/")) {
     const delimiter = str.includes("-") ? "-" : "/";
-    const parts = str.split(delimiter);
+    const parts = str.split(' ')[0].split(delimiter);
 
     if (parts.length === 3) {
       if (parts[0].length <= 2 && parts[2].length === 4) {
@@ -97,17 +97,99 @@ function formatDate(dateVal) {
 }
 
 /* =========================================================
+   NORMALISASI PAYLOAD DARI APPS SCRIPT KE FORMAT DASHBOARD
+========================================================= */
+function normalizeDashboardPayload(raw) {
+  if (Array.isArray(raw.rows) && Array.isArray(raw.kdkmpList)) {
+    return raw;
+  }
+
+  const masterList = Array.isArray(raw.masterKdkmp) ? raw.masterKdkmp : [];
+  const closeShiftList = Array.isArray(raw.closeShift) ? raw.closeShift : [];
+  const setorOmsetList = Array.isArray(raw.setorOmset) ? raw.setorOmset : [];
+
+  const kdkmpSet = new Set();
+  masterList.forEach(item => {
+    const nama = typeof item === 'string' ? item : (item.namaKdkmp || item.kdkmp || '');
+    if (String(nama).trim()) kdkmpSet.add(String(nama).trim());
+  });
+
+  const rows = [];
+  const operationalSet = new Set();
+
+  closeShiftList.forEach(cs => {
+    const kdkmp = String(cs.namaKdkmp || cs.kdkmp || '').trim();
+    const tgl = toISODate(cs.tanggalTransaksi || cs.tanggal || '');
+    const nominal = Number(cs.omsetHarian !== undefined ? cs.omsetHarian : (cs.nominal || 0)) || 0;
+    if (!kdkmp) return;
+
+    kdkmpSet.add(kdkmp);
+    operationalSet.add(kdkmp);
+
+    rows.push({
+      id: cs.idShift || '',
+      date: tgl,
+      kdkmp: kdkmp,
+      nama: cs.namaSales || '',
+      nominal: nominal,
+      status: 'Close Shift',
+      bukti: cs.buktiUrl || '',
+      catatan: cs.catatan || '',
+      flagDouble: ''
+    });
+  });
+
+  setorOmsetList.forEach(so => {
+    const kdkmp = String(so.namaKdkmp || so.kdkmp || '').trim();
+    const tgl = toISODate(so.tanggalTransaksi || so.tanggal || '');
+    const nominal = Number(so.nominalTransfer !== undefined ? so.nominalTransfer : (so.nominal || 0)) || 0;
+    if (!kdkmp) return;
+
+    kdkmpSet.add(kdkmp);
+    operationalSet.add(kdkmp);
+
+    rows.push({
+      id: so.idSetor || '',
+      date: tgl,
+      kdkmp: kdkmp,
+      nama: so.namaPenyetor || '',
+      nominal: nominal,
+      status: 'Setor Omset',
+      bukti: so.buktiUrl || '',
+      catatan: so.catatanSetor || '',
+      flagDouble: ''
+    });
+  });
+
+  const kdkmpList = Array.from(kdkmpSet).sort((a, b) => a.localeCompare(b, 'id'));
+  const operationalKdkmp = Array.from(operationalSet);
+
+  return {
+    totalKdkmp: kdkmpList.length || 34,
+    kdkmpList,
+    operationalKdkmp,
+    rows,
+    users: Array.isArray(raw.users) ? raw.users : []
+  };
+}
+
+/* =========================================================
    LOAD DASHBOARD (FETCH API)
 ========================================================= */
 function loadDashboard() {
   showLoading();
 
   fetch(API_URL, { method: "GET", redirect: "follow" })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
     .then(data => {
-      if (data.error) throw new Error(data.error);
-      dashboardData = data;
-      initializeDashboard(data);
+      if (data.status === 'error' || data.error) {
+        throw new Error(data.message || data.error);
+      }
+      dashboardData = normalizeDashboardPayload(data);
+      initializeDashboard(dashboardData);
     })
     .catch(error => {
       console.error("Gagal mengambil data dari Spreadsheet:", error);
@@ -241,7 +323,6 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
 
   alertContainer.innerHTML = "";
 
-  // 1. DETEKSI DOUBLE INPUT BERDASARKAN KOLOM O SPREADSHEET (row.flagDouble)
   const duplicates = [];
   const seenDupKeys = new Set();
 
@@ -280,7 +361,6 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
     alertContainer.innerHTML += dupHtml;
   }
 
-  // 2. PETAKAN TANGGAL OPERASIONAL PERTAMA MASING-MASING KDKMP
   const kdkmpFirstDateMap = {};
   (dashboardData.rows || []).forEach(row => {
     const rowDateISO = toISODate(row.date);
@@ -317,7 +397,6 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
     selectedArea === "ALL" || getKdkmpArea(r.kdkmp) === selectedArea
   );
 
-  // A. LOGIKA CLOSE SHIFT (Hari Ini >= 17:00 & Bulan Ini)
   const checkDatesClose = [...datesMonthToYesterday];
   if (currentHour >= 17) {
     checkDatesClose.push(todayStr);
@@ -349,7 +428,6 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
     }
   });
 
-  // B. LOGIKA SETOR OMSET (Seluruh Hari di Bulan Ini s/d Kemarin)
   const checkDatesSetor = [...datesMonthToYesterday];
   const missingSetorDetails = [];
 
@@ -377,7 +455,6 @@ function checkSystemAlerts(rows, selectedArea = "ALL") {
     }
   });
 
-  // RENDER PERINGATAN KETERLAMBATAN
   if (missingCloseDetails.length > 0 || missingSetorDetails.length > 0) {
     const areaTitle = selectedArea === "BANDUNG_BARAT" ? "Area Bandung Barat" : (selectedArea === "KAB_BANDUNG" ? "Area Kab. Bandung" : "Semua Area");
     let missingHtml = `<div style="background: #fff3df; border: 1px solid #ffeeba; color: #856404; padding: 14px; border-radius: 10px; font-size: 13px;">`;

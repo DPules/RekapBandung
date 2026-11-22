@@ -588,3 +588,172 @@ tbody tr:hover {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* =========================================================
+   TOPBAR COMPACT ACTIONS (POJOK KANAN ATAS & RINGKAS)
+   ========================================================= */
+.topbar {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.topbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.btn-compact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.btn-compact:hover {
+  opacity: 0.88;
+}
+
+.btn-input-sales {
+  background: #18864b;
+  color: #ffffff;
+}
+
+.refresh-btn {
+  background: #7b1e2b;
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .topbar h1 {
+    font-size: 18px;
+  }
+
+  .topbar p {
+    font-size: 11px;
+  }
+
+  .topbar > div:last-child,
+  .topbar-actions {
+    width: auto;
+    gap: 5px;
+  }
+
+  .btn-compact {
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+
+  .topbar .refresh-btn {
+    flex: initial;
+    justify-content: center;
+  }
+}
+/* =========================================================
+   TOPBAR COMPACT ACTIONS (SEDikit LEBIH BESAR & BERJARAK BAWAH)
+   ========================================================= */
+.topbar {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.topbar-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
+    margin-bottom: 6px;
+}
+
+.btn-compact {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 13px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    margin-bottom: 4px;
+    transition: opacity 0.2s;
+}
+
+.btn-compact:hover {
+    opacity: 0.88;
+}
+
+.btn-input-sales {
+    background: #18864b;
+    color: #ffffff;
+}
+
+.refresh-btn {
+    background: #7b1e2b;
+    color: #ffffff;
+}
+
+@media (max-width: 640px) {
+    .topbar {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .topbar h1 {
+        font-size: 18px;
+    }
+
+    .topbar p {
+        font-size: 11px;
+    }
+
+    .topbar>div:last-child,
+    .topbar-actions {
+        width: auto;
+        gap: 6px;
+        margin-bottom: 4px;
+    }
+
+    .btn-compact {
+        padding: 7px 10px;
+        font-size: 11px;
+        margin-bottom: 2px;
+    }
+
+    .topbar .refresh-btn {
+        flex: initial;
+        justify-content: center;
+    }
+}

@@ -81,20 +81,25 @@
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
-            <!-- HEADER -->
-            <header class="top-header"
-                style="margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <h1 id="pageTitle" style="font-size: 22px; margin: 0; color: #222;">Dashboard Sales</h1>
-                    <p id="pageSub" style="font-size: 13px; color: #666; margin: 4px 0 0 0;">Monitoring operasional dan
-                        setoran KDKMP Area Bandung</p>
-                </div>
-                <button class="apply-btn" onclick="loadDashboard()"
-                    style="height: 36px; padding: 0 14px; font-size: 13px;">
-                    <i class="fa-solid fa-rotate"></i> Refresh Data
+        <header class="topbar">
+            <div>
+                <h1 id="pageTitle">Dashboard Sales</h1>
+                <p id="pageSub">Monitoring operasional dan setoran KDKMP Area Bandung</p>
+            </div>
+        
+            <div class="topbar-actions">
+                <a href="https://dpules.github.io/inputsales/" target="_blank" rel="noopener noreferrer"
+                    class="btn-compact btn-input-sales">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Input Sales</span>
+                </a>
+        
+                <button type="button" class="btn-compact refresh-btn" onclick="loadDashboard()" title="Refresh Data">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span>Refresh</span>
                 </button>
-            </header>
-
+            </div>
+        </header>
             <!-- FILTER GLOBAL -->
             <section class="filter-card">
                 <div class="filter-title">

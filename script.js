@@ -5,6 +5,7 @@ let dashboardData = null;
 let dailyChart = null;
 let statusChart = null;
 let filteredRows = [];
+let masterAreaByName = {};
 
 // KONFIGURASI PAGINASI
 const ROWS_PER_PAGE = 10;
@@ -14,36 +15,59 @@ let currentPageSetor = 1;
 let currentPageRanking = 1;
 
 /* =========================================================
-   MAPPING WILAYAH KDKMP (BANDUNG BARAT VS KAB. BANDUNG)
+   MAPPING & DETEKSI WILAYAH KDKMP (BANDUNG BARAT VS KAB. BANDUNG)
 ========================================================= */
-const AREA_MAPPING = {
-  BANDUNG_BARAT: [
-    "Lembang", "Parongpong", "Cisarua", "Cikalongwetan", "Cipeundeuy",
-    "Ngamprah", "Cipatat", "Padalarang", "Batujajar", "Cihampelas",
-    "Cililin", "Cipongkor", "Rongga", "Sindangkerta", "Gununghalu", "Saguling",
-    "Cihanjuang", "Gadobangkong", "Cibodas", "Laksana", "Mekarsari", "Kertamulya",
-    "Karyawangi", "Cijenuk", "Cikahuripan", "Cipangeran", "Ciharashas", "Bongas", "Sukatani"
-  ],
-  KAB_BANDUNG: [
-    "Nagreg", "Cicalengka", "Rancaekek", "Majalaya", "Cikancung",
-    "Paseh", "Ibun", "Soreang", "Katapang", "Banjaran", "Arjasari",
-    "Pameungpeuk", "Pangalengan", "Kertasari", "Pacet", "Ciparay",
-    "Baleendah", "Dayeuhkolot", "Bojongsoang", "Margahayu", "Margaasih",
-    "Ciwidey", "Rancabali", "Pasirjambu", "Cimaung", "Cileunyi", "Cilengkrang", "Cimenyan",
-    "Cipeujeuh", "Citaman", "Bojongloa", "Sukamaju", "Jelekong", "Andir",
-    "Pulosari", "Babakan", "Rahayu", "Cangkuang", "Mandalawangi", "Mekarjaya", "Tangsimekar"
-  ]
-};
+const KBB_KEYWORDS = [
+  // Kecamatan di Kabupaten Bandung Barat
+  "lembang", "parongpong", "cisarua", "cikalongwetan", "cikalong wetan",
+  "cipeundeuy", "ngamprah", "cipatat", "padalarang", "batujajar",
+  "cihampelas", "cililin", "cipongkor", "rongga", "sindangkerta",
+  "gununghalu", "saguling",
+  // Desa / kelurahan / lokasi umum di Kabupaten Bandung Barat
+  "baranangsiang", "batujajartimur", "batujajar timur", "batujajarbarat", "batujajar barat",
+  "bojong", "ciharashas", "cikahuripan", "cikalong", "cilame", "cinengah",
+  "cipangeran", "ciptaharja", "cirawamekar", "ciroyom", "citatah",
+  "gadobangkong", "girimukti", "jatimekar", "jayamekar", "karanganyar",
+  "karyawangi", "kertamulya", "laksana", "mandalawangi", "mekarsari",
+  "nyalindung", "puncaksari", "rende", "rajamandala", "sukatani", "cihanjuang"
+];
 
-function getKdkmpArea(kdkmpName) {
-  const clean = String(kdkmpName || '').toLowerCase().replace(/_/g, ' ');
+function detectAreaFromText(text) {
+  const clean = String(text || "").toLowerCase().replace(/[_-]+/g, " ").trim();
+  if (!clean) return null;
 
-  const isKBB = AREA_MAPPING.BANDUNG_BARAT.some(key => clean.includes(key.toLowerCase()));
-  if (isKBB) return "BANDUNG_BARAT";
+  if (clean.includes("bandung barat") || /\bkbb\b/.test(clean)) {
+    return "BANDUNG_BARAT";
+  }
 
-  const isKabBandung = AREA_MAPPING.KAB_BANDUNG.some(key => clean.includes(key.toLowerCase()));
-  if (isKabBandung) return "KAB_BANDUNG";
+  if (clean.includes("kabupaten bandung") || clean.includes("kab. bandung") || clean.includes("kab bandung")) {
+    return "KAB_BANDUNG";
+  }
 
+  if (KBB_KEYWORDS.some(key => clean.includes(key))) {
+    return "BANDUNG_BARAT";
+  }
+
+  return null;
+}
+
+function getKdkmpArea(kdkmpName, extraAreaText = "") {
+  const key = String(kdkmpName || "").trim().toLowerCase();
+
+  // 1. Cek peta wilayah dari master_kdkmp jika tersedia
+  if (key && masterAreaByName[key]) {
+    return masterAreaByName[key];
+  }
+
+  // 2. Cek kolom wilayah/kabupaten/area tambahan jika tersedia
+  const fromExtra = detectAreaFromText(extraAreaText);
+  if (fromExtra) return fromExtra;
+
+  // 3. Deteksi dari nama/kecamatan/desa KDKMP
+  const fromName = detectAreaFromText(kdkmpName);
+  if (fromName) return fromName;
+
+  // 4. Default ke Kabupaten Bandung
   return "KAB_BANDUNG";
 }
 
@@ -100,31 +124,90 @@ function formatDate(dateVal) {
    NORMALISASI PAYLOAD DARI APPS SCRIPT KE FORMAT DASHBOARD
 ========================================================= */
 function normalizeDashboardPayload(raw) {
-  if (Array.isArray(raw.rows) && Array.isArray(raw.kdkmpList)) {
-    return raw;
-  }
+  masterAreaByName = {};
 
-  const masterList = Array.isArray(raw.masterKdkmp) ? raw.masterKdkmp : [];
-  const closeShiftList = Array.isArray(raw.closeShift) ? raw.closeShift : [];
-  const setorOmsetList = Array.isArray(raw.setorOmset) ? raw.setorOmset : [];
+  const masterList = Array.isArray(raw.masterKdkmp)
+    ? raw.masterKdkmp
+    : (Array.isArray(raw.master_kdkmp) ? raw.master_kdkmp : []);
 
   const kdkmpSet = new Set();
+
   masterList.forEach(item => {
-    const nama = typeof item === 'string' ? item : (item.namaKdkmp || item.kdkmp || '');
-    if (String(nama).trim()) kdkmpSet.add(String(nama).trim());
+    if (typeof item === "string") {
+      const nama = item.trim();
+      if (nama) {
+        kdkmpSet.add(nama);
+        const detected = detectAreaFromText(nama);
+        if (detected) masterAreaByName[nama.toLowerCase()] = detected;
+      }
+    } else if (item && typeof item === "object") {
+      const nama = String(
+        item.namaKdkmp || item.nama_kdkmp || item.kdkmp || item.nama || item.Customer_KDKMP || ""
+      ).trim();
+
+      const areaInfo = [
+        item.kabupaten, item.Kabupaten, item.area, item.Area,
+        item.wilayah, item.Wilayah, item.kecamatan, item.Kecamatan, item.alamat, item.Alamat
+      ].filter(Boolean).join(" ");
+
+      if (nama) {
+        kdkmpSet.add(nama);
+        const detected = detectAreaFromText(areaInfo) || detectAreaFromText(nama);
+        if (detected) {
+          masterAreaByName[nama.toLowerCase()] = detected;
+        }
+      }
+    }
   });
 
+  if (Array.isArray(raw.rows) && Array.isArray(raw.kdkmpList)) {
+    raw.kdkmpList.forEach(k => {
+      const cleanK = String(k || "").trim();
+      if (cleanK) {
+        kdkmpSet.add(cleanK);
+        if (!masterAreaByName[cleanK.toLowerCase()]) {
+          const detected = detectAreaFromText(cleanK);
+          if (detected) masterAreaByName[cleanK.toLowerCase()] = detected;
+        }
+      }
+    });
+
+    raw.rows.forEach(r => {
+      const cleanK = String(r.kdkmp || "").trim();
+      const extra = r.kabupaten || r.area || r.wilayah || r.kecamatan || "";
+      if (cleanK && !masterAreaByName[cleanK.toLowerCase()]) {
+        const detected = detectAreaFromText(extra) || detectAreaFromText(cleanK);
+        if (detected) masterAreaByName[cleanK.toLowerCase()] = detected;
+      }
+    });
+
+    const mergedList = Array.from(kdkmpSet).sort((a, b) => a.localeCompare(b, 'id'));
+    return {
+      ...raw,
+      kdkmpList: mergedList,
+      totalKdkmp: mergedList.length || raw.totalKdkmp || 34
+    };
+  }
+
+  const closeShiftList = Array.isArray(raw.closeShift) ? raw.closeShift : [];
+  const setorOmsetList = Array.isArray(raw.setorOmset) ? raw.setorOmset : [];
   const rows = [];
   const operationalSet = new Set();
 
   closeShiftList.forEach(cs => {
-    const kdkmp = String(cs.namaKdkmp || cs.kdkmp || '').trim();
+    const kdkmp = String(cs.namaKdkmp || cs.nama_kdkmp || cs.kdkmp || '').trim();
     const tgl = toISODate(cs.tanggalTransaksi || cs.tanggal || '');
     const nominal = Number(cs.omsetHarian !== undefined ? cs.omsetHarian : (cs.nominal || 0)) || 0;
     if (!kdkmp) return;
 
     kdkmpSet.add(kdkmp);
     operationalSet.add(kdkmp);
+
+    const extra = cs.kabupaten || cs.area || cs.wilayah || cs.kecamatan || "";
+    if (!masterAreaByName[kdkmp.toLowerCase()]) {
+      const detected = detectAreaFromText(extra) || detectAreaFromText(kdkmp);
+      if (detected) masterAreaByName[kdkmp.toLowerCase()] = detected;
+    }
 
     rows.push({
       id: cs.idShift || '',
@@ -135,18 +218,24 @@ function normalizeDashboardPayload(raw) {
       status: 'Close Shift',
       bukti: cs.buktiUrl || '',
       catatan: cs.catatan || '',
-      flagDouble: ''
+      flagDouble: cs.flagDouble || ''
     });
   });
 
   setorOmsetList.forEach(so => {
-    const kdkmp = String(so.namaKdkmp || so.kdkmp || '').trim();
+    const kdkmp = String(so.namaKdkmp || so.nama_kdkmp || so.kdkmp || '').trim();
     const tgl = toISODate(so.tanggalTransaksi || so.tanggal || '');
     const nominal = Number(so.nominalTransfer !== undefined ? so.nominalTransfer : (so.nominal || 0)) || 0;
     if (!kdkmp) return;
 
     kdkmpSet.add(kdkmp);
     operationalSet.add(kdkmp);
+
+    const extra = so.kabupaten || so.area || so.wilayah || so.kecamatan || "";
+    if (!masterAreaByName[kdkmp.toLowerCase()]) {
+      const detected = detectAreaFromText(extra) || detectAreaFromText(kdkmp);
+      if (detected) masterAreaByName[kdkmp.toLowerCase()] = detected;
+    }
 
     rows.push({
       id: so.idSetor || '',
@@ -157,7 +246,7 @@ function normalizeDashboardPayload(raw) {
       status: 'Setor Omset',
       bukti: so.buktiUrl || '',
       catatan: so.catatanSetor || '',
-      flagDouble: ''
+      flagDouble: so.flagDouble || ''
     });
   });
 
@@ -529,7 +618,7 @@ function updateOperationalByArea(selectedArea) {
     selectedArea === "ALL" || getKdkmpArea(k) === selectedArea
   );
 
-  const total = selectedArea === "ALL" ? (dashboardData.totalKdkmp || allList.length) : allList.length;
+  const total = allList.length;
   const operational = opList.length;
   const belum = Math.max(0, total - operational);
 
@@ -541,45 +630,203 @@ function updateOperationalByArea(selectedArea) {
 }
 
 /* =========================================================
+   HELPER DATA KDKMP (OPERASIONAL & BELUM OPERASIONAL)
+========================================================= */
+function buildKdkmpStatusList(selectedArea = "ALL") {
+  if (!dashboardData) return [];
+
+  const firstDateMap = {};
+  const omsetMap = {};
+  const setorMap = {};
+
+  (dashboardData.rows || []).forEach(r => {
+    const cleanKey = String(r.kdkmp || '').trim();
+    if (!cleanKey) return;
+
+    const iso = toISODate(r.date);
+    if (iso) {
+      if (!firstDateMap[cleanKey] || iso < firstDateMap[cleanKey]) {
+        firstDateMap[cleanKey] = iso;
+      }
+    }
+
+    const isSetor = String(r.status || '').toLowerCase().includes("setor");
+    const val = Number(r.nominal || 0);
+    if (isSetor) {
+      setorMap[cleanKey] = (setorMap[cleanKey] || 0) + val;
+    } else {
+      omsetMap[cleanKey] = (omsetMap[cleanKey] || 0) + val;
+    }
+  });
+
+  const operationalSet = new Set(
+    (dashboardData.operationalKdkmp || []).map(k => String(k).trim().toLowerCase())
+  );
+
+  const kdkmpList = (dashboardData.kdkmpList || []).filter(k =>
+    selectedArea === "ALL" || getKdkmpArea(k) === selectedArea
+  );
+
+  return kdkmpList.map(name => {
+    const cleanName = String(name).trim();
+    const isOperational = operationalSet.has(cleanName.toLowerCase());
+    const areaCode = getKdkmpArea(cleanName);
+    const areaLabel = areaCode === "BANDUNG_BARAT" ? "Bandung Barat" : "Kabupaten Bandung";
+    const totalOmset = omsetMap[cleanName] || 0;
+    const totalSetor = setorMap[cleanName] || 0;
+
+    return {
+      rawName: cleanName,
+      namaKdkmp: cleanName.replaceAll("_", " "),
+      areaCode,
+      areaLabel,
+      mulaiOperasionalISO: firstDateMap[cleanName] || "",
+      mulaiOperasional: firstDateMap[cleanName] ? formatDate(firstDateMap[cleanName]) : "-",
+      isOperational,
+      statusText: isOperational ? "Sudah Operasional" : "Belum Operasional",
+      totalOmset,
+      totalSetor,
+      selisih: totalOmset - totalSetor
+    };
+  });
+}
+
+function onKdkmpOpStatusChange() {
+  const area = document.getElementById("areaFilter")?.value || "ALL";
+  renderKdkmpTableByArea(area);
+}
+
+function openKdkmpTabWithFilter(statusFilterVal = "ALL") {
+  const navBtn = document.querySelector('.nav-item[data-target="sec-kdkmp"]');
+  if (navBtn) navBtn.click();
+
+  const statusSelect = document.getElementById("kdkmpOpStatusFilter");
+  if (statusSelect) {
+    statusSelect.value = statusFilterVal;
+    onKdkmpOpStatusChange();
+  }
+}
+
+/* =========================================================
    TABEL MENU KDKMP
 ========================================================= */
 function renderKdkmpTableByArea(selectedArea) {
   const tbody = document.getElementById("kdkmpTableBody");
   if (!tbody || !dashboardData) return;
+
+  const statusFilter = document.getElementById("kdkmpOpStatusFilter")?.value || "ALL";
+  let list = buildKdkmpStatusList(selectedArea);
+
+  if (statusFilter === "OPERASIONAL") {
+    list = list.filter(item => item.isOperational);
+  } else if (statusFilter === "BELUM") {
+    list = list.filter(item => !item.isOperational);
+  }
+
+  const subtitleEl = document.getElementById("kdkmpTableSubtitle");
+  if (subtitleEl) {
+    const opCount = list.filter(i => i.isOperational).length;
+    const belumCount = list.filter(i => !i.isOperational).length;
+    subtitleEl.textContent = `Menampilkan ${list.length} outlet (${opCount} Operasional, ${belumCount} Belum Operasional)`;
+  }
+
   tbody.innerHTML = "";
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="loading">Tidak ada data outlet KDKMP sesuai filter.</td></tr>`;
+    return;
+  }
 
-  const firstDateMap = {};
-  (dashboardData.rows || []).forEach(r => {
-    const iso = toISODate(r.date);
-    if (r.kdkmp && iso) {
-      if (!firstDateMap[r.kdkmp] || iso < firstDateMap[r.kdkmp]) {
-        firstDateMap[r.kdkmp] = iso;
-      }
-    }
-  });
-
-  const kdkmpList = (dashboardData.kdkmpList || []).filter(k =>
-    selectedArea === "ALL" || getKdkmpArea(k) === selectedArea
-  );
-  const operationalList = dashboardData.operationalKdkmp || [];
-
-  kdkmpList.forEach((name, index) => {
-    const isOperational = operationalList.includes(name);
-    const badgeClass = isOperational ? "badge-success" : "badge-warning";
-    const statusText = isOperational ? "Operasional" : "Belum Operasional";
-    const areaBadge = getAreaBadge(getKdkmpArea(name));
-    const startOpDate = firstDateMap[name] ? formatDate(firstDateMap[name]) : "-";
+  list.forEach((item, index) => {
+    const badgeClass = item.isOperational ? "badge-success" : "badge-warning";
+    const areaBadge = getAreaBadge(item.areaCode);
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${index + 1}</td>
-      <td><strong>${name.replaceAll("_", " ")}</strong></td>
+      <td><strong>${item.namaKdkmp}</strong></td>
       <td>${areaBadge}</td>
-      <td>${startOpDate}</td>
-      <td><span class="badge ${badgeClass}">${statusText}</span></td>
+      <td>${item.mulaiOperasional}</td>
+      <td><strong>${formatRupiah(item.totalOmset)}</strong></td>
+      <td><span class="badge ${badgeClass}">${item.statusText}</span></td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+/* =========================================================
+   DOWNLOAD / EXPORT DATA KDKMP KE EXCEL (.XLSX)
+========================================================= */
+function exportKdkmpData(filterType = "ALL") {
+  if (!dashboardData) {
+    alert("Data belum dimuat. Silakan tunggu atau klik Refresh.");
+    return;
+  }
+
+  const selectedArea = document.getElementById("areaFilter")?.value || "ALL";
+  let list = buildKdkmpStatusList(selectedArea);
+
+  let labelFile = "Semua_KDKMP";
+  if (filterType === "OPERASIONAL") {
+    list = list.filter(item => item.isOperational);
+    labelFile = "KDKMP_Sudah_Operasional";
+  } else if (filterType === "BELUM") {
+    list = list.filter(item => !item.isOperational);
+    labelFile = "KDKMP_Belum_Operasional";
+  }
+
+  if (!list.length) {
+    alert("Tidak ada data KDKMP pada kategori tersebut untuk diunduh.");
+    return;
+  }
+
+  const areaSuffix = selectedArea === "ALL" ? "Semua_Area" : selectedArea;
+  const todayStr = toISODate(new Date());
+  const fileName = `${labelFile}_${areaSuffix}_${todayStr}.xlsx`;
+
+  const exportRows = list.map((item, idx) => ({
+    "No": idx + 1,
+    "Kode KDKMP": item.rawName,
+    "Nama KDKMP": item.namaKdkmp,
+    "Area Wilayah": item.areaLabel,
+    "Status Operasional": item.statusText,
+    "Tanggal Mulai Operasional": item.mulaiOperasional,
+    "Total Omset Close Shift (Rp)": item.totalOmset,
+    "Total Setor Omset (Rp)": item.totalSetor,
+    "Selisih (Rp)": item.selisih
+  }));
+
+  if (typeof XLSX !== "undefined") {
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    worksheet["!cols"] = [
+      { wch: 5 },
+      { wch: 28 },
+      { wch: 28 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 24 },
+      { wch: 26 },
+      { wch: 24 },
+      { wch: 18 }
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data KDKMP");
+    XLSX.writeFile(workbook, fileName);
+  } else {
+    const headers = Object.keys(exportRows[0]);
+    const csvContent = [
+      headers.join(","),
+      ...exportRows.map(row =>
+        headers.map(h => `"${String(row[h]).replace(/"/g, '""')}"`).join(",")
+      )
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName.replace(".xlsx", ".csv");
+    link.click();
+  }
 }
 
 /* =========================================================

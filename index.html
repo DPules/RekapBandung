@@ -5,9 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Monitoring Sales KDKMP</title>
-    <!-- Font Awesome & Chart.js -->
+    <!-- Font Awesome, Chart.js & SheetJS (Excel Export) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="style.css" />
     <style>
         /* Tambahan penyesuaian responsif untuk 5 filter & badge area */
@@ -81,25 +82,27 @@
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
-        <header class="topbar">
-            <div>
-                <h1 id="pageTitle">Dashboard Sales</h1>
-                <p id="pageSub">Monitoring operasional dan setoran KDKMP Area Bandung</p>
-            </div>
-        
-            <div class="topbar-actions">
-                <a href="https://dpules.github.io/inputsales/" target="_blank" rel="noopener noreferrer"
-                    class="btn-compact btn-input-sales">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <span>Input Sales</span>
-                </a>
-        
-                <button type="button" class="btn-compact refresh-btn" onclick="loadDashboard()" title="Refresh Data">
-                    <i class="fa-solid fa-rotate"></i>
-                    <span>Refresh</span>
-                </button>
-            </div>
-        </header>
+            <header class="topbar">
+                <div>
+                    <h1 id="pageTitle">Dashboard Sales</h1>
+                    <p id="pageSub">Monitoring operasional dan setoran KDKMP Area Bandung</p>
+                </div>
+
+                <div class="topbar-actions">
+                    <a href="https://dpules.github.io/inputsales/" target="_blank" rel="noopener noreferrer"
+                        class="btn-compact btn-input-sales">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Input Sales</span>
+                    </a>
+
+                    <button type="button" class="btn-compact refresh-btn" onclick="loadDashboard()"
+                        title="Refresh Data">
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+            </header>
+
             <!-- FILTER GLOBAL -->
             <section class="filter-card">
                 <div class="filter-title">
@@ -137,7 +140,7 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <button class="apply-btn" onclick="applyFilter()">
+                        <button type="button" class="apply-btn" onclick="applyFilter()">
                             <i class="fa-solid fa-magnifying-glass"></i> Tampilkan
                         </button>
                     </div>
@@ -145,8 +148,8 @@
             </section>
 
             <!-- =====================================
-           1. SECTION: DASHBOARD UTAMA
-      ===================================== -->
+                 1. SECTION: DASHBOARD UTAMA
+            ===================================== -->
             <section id="sec-dashboard" class="page-section active-section" style="display: block;">
                 <!-- NOTIFIKASI & PERINGATAN SYSTEM -->
                 <div id="alertContainer" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
@@ -154,27 +157,38 @@
 
                 <!-- KPI CARDS -->
                 <div class="kpi-grid">
-                    <div class="kpi-card">
+                    <div class="kpi-card kpi-clickable" onclick="openKdkmpTabWithFilter('ALL')"
+                        title="Lihat & Download Semua KDKMP">
                         <div class="kpi-icon red"><i class="fa-solid fa-store"></i></div>
                         <div>
                             <span>Total KDKMP</span>
                             <h3 id="totalKdkmp">34</h3>
+                            <small class="kpi-action-hint"><i class="fa-solid fa-download"></i> Detail / Export</small>
                         </div>
                     </div>
-                    <div class="kpi-card">
+
+                    <div class="kpi-card kpi-clickable" onclick="exportKdkmpData('OPERASIONAL')"
+                        title="Klik untuk Download Data KDKMP Sudah Operasional (.xlsx)">
                         <div class="kpi-icon green"><i class="fa-solid fa-circle-check"></i></div>
                         <div>
                             <span>Operasional</span>
                             <h3 id="operasional">0</h3>
+                            <small class="kpi-action-hint text-green"><i class="fa-solid fa-file-excel"></i> Download
+                                Operasional</small>
                         </div>
                     </div>
-                    <div class="kpi-card">
+
+                    <div class="kpi-card kpi-clickable" onclick="exportKdkmpData('BELUM')"
+                        title="Klik untuk Download Data KDKMP Belum Operasional (.xlsx)">
                         <div class="kpi-icon orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
                         <div>
                             <span>Belum Operasional</span>
                             <h3 id="belumOperasional">0</h3>
+                            <small class="kpi-action-hint text-orange"><i class="fa-solid fa-file-excel"></i> Download
+                                Belum Op.</small>
                         </div>
                     </div>
+
                     <div class="kpi-card">
                         <div class="kpi-icon purple"><i class="fa-solid fa-sack-dollar"></i></div>
                         <div>
@@ -182,6 +196,7 @@
                             <h3 id="totalOmset">Rp 0</h3>
                         </div>
                     </div>
+
                     <div class="kpi-card">
                         <div class="kpi-icon blue"><i class="fa-solid fa-money-bill-transfer"></i></div>
                         <div>
@@ -189,6 +204,7 @@
                             <h3 id="totalSetoran">Rp 0</h3>
                         </div>
                     </div>
+
                     <div class="kpi-card">
                         <div class="kpi-icon pink"><i class="fa-solid fa-scale-balanced"></i></div>
                         <div>
@@ -227,16 +243,40 @@
             </section>
 
             <!-- =====================================
-           2. SECTION: DATA KDKMP
-      ===================================== -->
+                 2. SECTION: DATA KDKMP
+            ===================================== -->
             <section id="sec-kdkmp" class="page-section" style="display: none;">
                 <div class="table-card">
-                    <div class="card-header">
+                    <div class="card-header kdkmp-header-wrap">
                         <div>
                             <h4>Daftar Outlet KDKMP</h4>
-                            <small>Status operasional masing-masing KDKMP per wilayah</small>
+                            <small id="kdkmpTableSubtitle">Status operasional masing-masing KDKMP per wilayah</small>
+                        </div>
+
+                        <div class="kdkmp-toolbar">
+                            <select id="kdkmpOpStatusFilter" onchange="onKdkmpOpStatusChange()"
+                                class="kdkmp-select-status" title="Filter Status Operasional">
+                                <option value="ALL">Semua Status</option>
+                                <option value="OPERASIONAL">Sudah Operasional</option>
+                                <option value="BELUM">Belum Operasional</option>
+                            </select>
+
+                            <button type="button" class="btn-export btn-export-green"
+                                onclick="exportKdkmpData('OPERASIONAL')">
+                                <i class="fa-solid fa-file-excel"></i> Download Operasional
+                            </button>
+
+                            <button type="button" class="btn-export btn-export-orange"
+                                onclick="exportKdkmpData('BELUM')">
+                                <i class="fa-solid fa-file-excel"></i> Download Belum Operasional
+                            </button>
+
+                            <button type="button" class="btn-export btn-export-dark" onclick="exportKdkmpData('ALL')">
+                                <i class="fa-solid fa-download"></i> Download Semua
+                            </button>
                         </div>
                     </div>
+
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -245,6 +285,7 @@
                                     <th>Nama KDKMP</th>
                                     <th>Area Wilayah</th>
                                     <th>Mulai Operasional</th>
+                                    <th>Total Omset</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -255,8 +296,8 @@
             </section>
 
             <!-- =====================================
-           3. SECTION: PERINGKAT OMSET
-      ===================================== -->
+                 3. SECTION: PERINGKAT OMSET
+            ===================================== -->
             <section id="sec-ranking" class="page-section" style="display: none;">
                 <div class="table-card">
                     <div class="card-header">
@@ -285,8 +326,8 @@
             </section>
 
             <!-- =====================================
-           4. SECTION: CLOSE SHIFT
-      ===================================== -->
+                 4. SECTION: CLOSE SHIFT
+            ===================================== -->
             <section id="sec-closeshift" class="page-section" style="display: none;">
                 <div class="table-card">
                     <div class="card-header">
@@ -315,8 +356,8 @@
             </section>
 
             <!-- =====================================
-           5. SECTION: SETORAN
-      ===================================== -->
+                 5. SECTION: SETORAN
+            ===================================== -->
             <section id="sec-setoran" class="page-section" style="display: none;">
                 <div class="table-card">
                     <div class="card-header">
@@ -345,8 +386,8 @@
             </section>
 
             <!-- =====================================
-           6. SECTION: REKAP SALES
-      ===================================== -->
+                 6. SECTION: REKAP SALES
+            ===================================== -->
             <section id="sec-rekap" class="page-section" style="display: none;">
                 <div class="table-card">
                     <div class="card-header">
